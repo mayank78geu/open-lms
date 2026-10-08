@@ -15,6 +15,9 @@ Backend/.env
 .vscode/
 *.iml
 
+#Database
+Supabase - Open Source Postgresql based database , cloud - hosted database
+
 # OS
 .DS_Store
 Thumbs.db
