@@ -360,23 +360,23 @@ export function CourseDetailPage() {
           <h3 className="text-base font-bold text-ink">Classmates & Faculty (48 Enrolled)</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 pt-2">
             <div className="p-3 rounded-xl border border-slate-200 flex items-center gap-3">
-              <Avatar initials="EP" color="violet" size="sm" />
+              <Avatar initials="PS" color="violet" size="sm" />
               <div>
-                <p className="text-xs font-bold text-ink">Dr. Elena Park</p>
+                <p className="text-xs font-bold text-ink">Dr. Priya Sharma</p>
                 <p className="text-[10px] text-ink-muted">Instructor</p>
               </div>
             </div>
             <div className="p-3 rounded-xl border border-slate-200 flex items-center gap-3">
-              <Avatar initials="MC" color="brand" size="sm" />
+              <Avatar initials="RS" color="brand" size="sm" />
               <div>
-                <p className="text-xs font-bold text-ink">Maya Chen</p>
+                <p className="text-xs font-bold text-ink">Rahul Sharma</p>
                 <p className="text-[10px] text-ink-muted">Student</p>
               </div>
             </div>
             <div className="p-3 rounded-xl border border-slate-200 flex items-center gap-3">
-              <Avatar initials="JL" color="blue" size="sm" />
+              <Avatar initials="AV" color="blue" size="sm" />
               <div>
-                <p className="text-xs font-bold text-ink">Jonah Lee</p>
+                <p className="text-xs font-bold text-ink">Arjun Verma</p>
                 <p className="text-[10px] text-ink-muted">Student</p>
               </div>
             </div>

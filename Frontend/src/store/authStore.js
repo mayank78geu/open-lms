@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { authStorage } from '../lib/auth';
 import { MOCK_USERS } from '../mocks/mockData';
 
-// Initial user defaults to student (Maya Chen) for immediate exploration
+// Initial user defaults to student (Rahul Sharma) for immediate exploration
 const savedUser = authStorage.getUser() || MOCK_USERS.student;
 
 export const useAuthStore = create((set, get) => ({

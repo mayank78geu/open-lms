@@ -10,24 +10,33 @@ export function StudentSignupPage() {
   const navigate = useNavigate();
   const { login } = useAuthStore();
 
+  const allowedDomain = import.meta.env.VITE_ALLOWED_EMAIL_DOMAIN;
+  const defaultDomain = allowedDomain || 'geu.edu';
+
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
-    firstName: 'Maya',
-    lastName: 'Chen',
-    email: 'maya.chen@northbridge.edu',
+    firstName: 'Rahul',
+    lastName: 'Sharma',
+    email: `rahul.sharma@${defaultDomain}`,
     password: 'password123!',
     confirmPassword: 'password123!',
     agreedToTerms: true,
-    program: 'Cognitive Science',
-    year: 'Year 2 (Class of 2027)',
-    studentId: 'NB-2027-8492',
+    program: 'Computer Science',
+    year: 'MCA · Year 2',
+    studentId: 'GEU-2027-8492',
     classCode: 'BIO214',
   });
 
   const [passwordStrength, setPasswordStrength] = useState('Strong password');
+  const [emailError, setEmailError] = useState('');
 
   const handleStep1Submit = (e) => {
     e.preventDefault();
+    if (allowedDomain && !formData.email.toLowerCase().endsWith('@' + allowedDomain.toLowerCase())) {
+      setEmailError(`Please use a valid @${allowedDomain} email address.`);
+      return;
+    }
+    setEmailError('');
     setCurrentStep(2);
   };
 
@@ -181,7 +190,7 @@ export function StudentSignupPage() {
                         onChange={(e) =>
                           setFormData({ ...formData, firstName: e.target.value })
                         }
-                        placeholder="Maya"
+                        placeholder="Rahul"
                         required
                       />
                       <Input
@@ -190,7 +199,7 @@ export function StudentSignupPage() {
                         onChange={(e) =>
                           setFormData({ ...formData, lastName: e.target.value })
                         }
-                        placeholder="Chen"
+                        placeholder="Sharma"
                         required
                       />
                     </div>
@@ -199,10 +208,12 @@ export function StudentSignupPage() {
                       label="University email"
                       type="email"
                       value={formData.email}
-                      onChange={(e) =>
-                        setFormData({ ...formData, email: e.target.value })
-                      }
-                      placeholder="maya.chen@northbridge.edu"
+                      error={emailError}
+                      onChange={(e) => {
+                        setEmailError('');
+                        setFormData({ ...formData, email: e.target.value });
+                      }}
+                      placeholder={`rahul.sharma@${defaultDomain}`}
                       required
                     />
 

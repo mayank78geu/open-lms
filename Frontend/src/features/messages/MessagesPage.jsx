@@ -12,8 +12,8 @@ export function MessagesPage() {
   const [threads, setThreads] = useState([
     {
       id: 't1',
-      participant: role === 'STUDENT' ? 'Dr. Elena Park' : 'Maya Chen',
-      initials: role === 'STUDENT' ? 'EP' : 'MC',
+      participant: role === 'STUDENT' ? 'Dr. Priya Sharma' : 'Rahul Sharma',
+      initials: role === 'STUDENT' ? 'PS' : 'RS',
       roleText: role === 'STUDENT' ? 'Professor · Cell Biology' : 'Student · BIO 214',
       lastMessage: 'Let me know if you need any clarification on the dialysis tubing lab.',
       time: '10 min ago',
@@ -21,21 +21,21 @@ export function MessagesPage() {
       messages: [
         {
           id: 'm1',
-          sender: role === 'STUDENT' ? 'Dr. Elena Park' : 'Dr. Elena Park',
-          text: 'Hello Maya, I noticed you started the prep work for Module 2.',
+          sender: role === 'STUDENT' ? 'Dr. Priya Sharma' : 'Dr. Priya Sharma',
+          text: 'Hello Rahul, I noticed you started the prep work for Module 2.',
           time: '9:30 AM',
           isMe: role === 'PROFESSOR',
         },
         {
           id: 'm2',
-          sender: 'Maya Chen',
-          text: 'Yes Dr. Park! I had a quick question regarding the solute concentration gradient on slide 14.',
+          sender: 'Rahul Sharma',
+          text: 'Yes Dr. Sharma! I had a quick question regarding the solute concentration gradient on slide 14.',
           time: '9:42 AM',
           isMe: role === 'STUDENT',
         },
         {
           id: 'm3',
-          sender: 'Dr. Elena Park',
+          sender: 'Dr. Priya Sharma',
           text: 'Let me know if you need any clarification on the dialysis tubing lab during office hours!',
           time: '10:05 AM',
           isMe: role === 'PROFESSOR',

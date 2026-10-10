@@ -20,7 +20,7 @@ import { cn } from '../../lib/utils';
 
 export function SubmissionsGradingPage() {
   const data = MOCK_SUBMISSIONS_DATA;
-  const [selectedStudentId, setSelectedStudentId] = useState('s-maya-chen');
+  const [selectedStudentId, setSelectedStudentId] = useState('s-rahul-sharma');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterTab, setFilterTab] = useState('all');
 
@@ -274,7 +274,7 @@ export function SubmissionsGradingPage() {
               {currentStudent.title}
             </h3>
 
-            {currentStudent.id === 's-maya-chen' ? (
+            {currentStudent.id === 's-rahul-sharma' ? (
               <>
                 <p className="text-xs text-ink leading-relaxed">
                   In our dialysis tubing investigation, the movement of iodine into the

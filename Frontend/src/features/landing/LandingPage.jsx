@@ -125,13 +125,13 @@ export function LandingPage() {
             <div className="pt-6 flex items-center gap-3.5">
               <div className="flex -space-x-2">
                 <div className="w-9 h-9 rounded-full ring-2 ring-white bg-gradient-to-tr from-violet-500 to-indigo-400 text-white font-bold text-xs flex items-center justify-center">
-                  MC
+                  RS
                 </div>
                 <div className="w-9 h-9 rounded-full ring-2 ring-white bg-gradient-to-tr from-sky-400 to-blue-600 text-white font-bold text-xs flex items-center justify-center">
-                  JL
+                  AV
                 </div>
                 <div className="w-9 h-9 rounded-full ring-2 ring-white bg-gradient-to-tr from-emerald-400 to-teal-600 text-white font-bold text-xs flex items-center justify-center">
-                  AR
+                  AG
                 </div>
               </div>
               <p className="text-xs font-medium text-ink-muted">
@@ -159,8 +159,8 @@ export function LandingPage() {
 
               {/* Greeting */}
               <div className="pt-4">
-                <p className="text-sm font-bold text-ink">Good morning, Maya 👋</p>
-                <p className="text-[11px] text-ink-muted">Northbridge · Cognitive Science</p>
+                <p className="text-sm font-bold text-ink">Good morning, Rahul 👋</p>
+                <p className="text-[11px] text-ink-muted">Graphic Era · Computer Science</p>
               </div>
 
               {/* Mini Stat Tiles */}

@@ -10,7 +10,9 @@ export function LoginPage() {
   const navigate = useNavigate();
   const { login } = useAuthStore();
 
-  const [email, setEmail] = useState('maya.chen@northbridge.edu');
+  const allowedDomain = import.meta.env.VITE_ALLOWED_EMAIL_DOMAIN;
+  const defaultDomain = allowedDomain || 'geu.edu';
+  const [email, setEmail] = useState(`rahul.sharma@${defaultDomain}`);
   const [password, setPassword] = useState('password123');
   const [keepSignedIn, setKeepSignedIn] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
@@ -18,13 +20,19 @@ export function LoginPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setIsLoading(true);
     setError('');
+
+    if (allowedDomain && !email.toLowerCase().endsWith('@' + allowedDomain.toLowerCase())) {
+      setError(`Please sign in with your @${allowedDomain} email address.`);
+      return;
+    }
+
+    setIsLoading(true);
 
     setTimeout(() => {
       setIsLoading(false);
       // Auto detect or select role based on email or default
-      const isProf = email.toLowerCase().includes('elena') || email.toLowerCase().includes('park');
+      const isProf = email.toLowerCase().includes('priya') || email.toLowerCase().includes('prof');
       const role = isProf ? 'PROFESSOR' : 'STUDENT';
       login(email, password, role);
 
@@ -39,10 +47,10 @@ export function LoginPage() {
 
   const fillQuickUser = (role) => {
     if (role === 'PROFESSOR') {
-      setEmail('elena.park@northbridge.edu');
+      setEmail(`priya.sharma@${defaultDomain}`);
       setPassword('profPass123!');
     } else {
-      setEmail('maya.chen@northbridge.edu');
+      setEmail(`rahul.sharma@${defaultDomain}`);
       setPassword('studentPass123!');
     }
   };
@@ -82,18 +90,18 @@ export function LoginPage() {
             CampusFlow helps me see the whole semester without feeling overwhelmed.
           </blockquote>
           <div>
-            <div className="font-semibold text-white text-base">Maya Chen</div>
-            <div className="text-xs text-slate-400">Cognitive Science, Class of 2027</div>
+            <div className="font-semibold text-white text-base">Rahul Sharma</div>
+            <div className="text-xs text-slate-400">Computer Science, Class of 2027</div>
           </div>
 
           {/* Campus photo card vignette */}
           <div className="pt-6">
             <div className="rounded-2xl overflow-hidden border border-navy-700/80 bg-navy-800/80 shadow-2xl relative p-4 flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-violet-600 to-brand-400 flex items-center justify-center text-white font-bold text-lg">
-                NB
+                GEU
               </div>
               <div>
-                <p className="text-xs font-semibold text-white">Northbridge University</p>
+                <p className="text-xs font-semibold text-white">Graphic Era University</p>
                 <p className="text-[11px] text-slate-400">Official LMS Academic Portal</p>
               </div>
             </div>
@@ -145,14 +153,14 @@ export function LoginPage() {
                 onClick={() => fillQuickUser('STUDENT')}
                 className="px-2.5 py-1 rounded-md bg-white border border-ink-border text-brand-700 font-medium hover:bg-brand-50"
               >
-                Maya (Student)
+                Rahul (Student)
               </button>
               <button
                 type="button"
                 onClick={() => fillQuickUser('PROFESSOR')}
                 className="px-2.5 py-1 rounded-md bg-white border border-ink-border text-slate-700 font-medium hover:bg-slate-100"
               >
-                Dr. Park (Professor)
+                Dr. Sharma (Professor)
               </button>
             </div>
           </div>
@@ -161,7 +169,7 @@ export function LoginPage() {
           <button
             type="button"
             onClick={() => {
-              login('maya.chen@northbridge.edu', 'password', 'STUDENT');
+              login(`rahul.sharma@${defaultDomain}`, 'password', 'STUDENT');
               navigate('/student/home');
             }}
             className="w-full py-2.5 px-4 rounded-xl border border-ink-border hover:bg-slate-50 text-ink text-sm font-semibold flex items-center justify-center gap-3 transition-colors shadow-2xs"
@@ -212,7 +220,7 @@ export function LoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="maya.chen@northbridge.edu"
+              placeholder={`rahul.sharma@${defaultDomain}`}
               required
             />
 

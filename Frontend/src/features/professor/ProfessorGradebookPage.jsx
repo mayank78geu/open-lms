@@ -5,11 +5,11 @@ import { Avatar } from '../../components/ui/Avatar';
 
 export function ProfessorGradebookPage() {
   const students = [
-    { name: 'Maya Chen', initials: 'MC', q1: 19, q2: 18, lab1: 20, lab2: 18, avg: '92.4%' },
-    { name: 'Jonah Lee', initials: 'JL', q1: 17, q2: 16, lab1: 18, lab2: 16, avg: '84.2%' },
-    { name: 'Amara Reyes', initials: 'AR', q1: 20, q2: 19, lab1: 19, lab2: 17, avg: '94.0%' },
-    { name: 'Theo Kim', initials: 'TK', q1: 18, q2: 17, lab1: 18, lab2: 18, avg: '88.5%' },
-    { name: 'Nora Shah', initials: 'NS', q1: 16, q2: 0, lab1: 17, lab2: 0, avg: '68.0%' },
+    { name: 'Rahul Sharma', initials: 'RS', q1: 19, q2: 18, lab1: 20, lab2: 18, avg: '92.4%' },
+    { name: 'Arjun Verma', initials: 'AV', q1: 17, q2: 16, lab1: 18, lab2: 16, avg: '84.2%' },
+    { name: 'Ananya Gupta', initials: 'AG', q1: 20, q2: 19, lab1: 19, lab2: 17, avg: '94.0%' },
+    { name: 'Vikram Singh', initials: 'VS', q1: 18, q2: 17, lab1: 18, lab2: 18, avg: '88.5%' },
+    { name: 'Pooja Joshi', initials: 'PJ', q1: 16, q2: 0, lab1: 17, lab2: 0, avg: '68.0%' },
   ];
 
   return (

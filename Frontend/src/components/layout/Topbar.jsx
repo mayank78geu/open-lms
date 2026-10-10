@@ -48,7 +48,7 @@ export function Topbar({ title, subtitle }) {
           ) : (
             <div>
               <h1 className="text-base font-bold text-ink tracking-tight">
-                {role === 'PROFESSOR' ? 'Good morning, Dr. Park' : 'Good morning, Maya 👋'}
+                {role === 'PROFESSOR' ? 'Good morning, Dr. Sharma' : 'Good morning, Rahul 👋'}
               </h1>
               <p className="text-[11px] text-ink-muted">
                 {role === 'PROFESSOR'
