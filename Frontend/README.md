@@ -1,5 +1,3 @@
-<img width="1158" height="1358" alt="Open LMS Entity Relationship Diagram" src="https://github.com/user-attachments/assets/3a7cfb58-f54f-4aba-aed1-f796528d04e3" /># Open LMS – Frontend
-
 A modern, responsive Learning Management System (LMS) web application built using React 18, Vite, and Tailwind CSS.
 
 ## Features
