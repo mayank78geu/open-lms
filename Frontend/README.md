@@ -1,4 +1,4 @@
-# Open LMS – Frontend
+<img width="1158" height="1358" alt="Open LMS Entity Relationship Diagram" src="https://github.com/user-attachments/assets/3a7cfb58-f54f-4aba-aed1-f796528d04e3" /># Open LMS – Frontend
 
 A modern, responsive Learning Management System (LMS) web application built using React 18, Vite, and Tailwind CSS.
 
@@ -67,3 +67,18 @@ Frontend/
 ├── tailwind.config.js
 └── vite.config.js
 ```
+
+## Project Diagrams
+
+ ERD of OPEN LMS.
+
+<img width="1158" height="1358" alt="Open LMS Entity Relationship Diagram" src="https://github.com/user-attachments/assets/6fc48f01-9b6b-4a1f-8c33-dd429c01222e" />
+
+ Level 2 DFD of OPEN LMS.
+
+ <img width="1774" height="887" alt="Open LMS Level 2 Data Flow Diagram" src="https://github.com/user-attachments/assets/0d3a87cb-12f8-444b-be62-422c5366f780" />
+
+
+
+
+
