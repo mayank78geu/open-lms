@@ -31,7 +31,7 @@ export function LoginPage() {
 
     setTimeout(() => {
       setIsLoading(false);
-      // Auto detect or select role based on email or default
+     
       const isProf = email.toLowerCase().includes('priya') || email.toLowerCase().includes('prof');
       const role = isProf ? 'PROFESSOR' : 'STUDENT';
       login(email, password, role);
@@ -195,7 +195,7 @@ export function LoginPage() {
             Continue with Google
           </button>
 
-          {/* Divider */}
+        
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-ink-border" />
@@ -207,7 +207,7 @@ export function LoginPage() {
             </div>
           </div>
 
-          {/* Sign In Form */}
+       
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
               <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-xs text-rose-700 font-medium">
