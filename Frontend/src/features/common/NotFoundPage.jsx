@@ -15,7 +15,7 @@ export function NotFoundPage() {
       </p>
       <Link to="/">
         <Button variant="primary" size="md" icon={Home}>
-          Return to CampusFlow
+          Return to Open LMS
         </Button>
       </Link>
     </div>

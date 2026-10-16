@@ -100,7 +100,7 @@ export const PasswordInput = React.forwardRef(
 PasswordInput.displayName = 'PasswordInput';
 
 export const SearchInput = React.forwardRef(
-  ({ className, placeholder = 'Search CampusFlow...', onShortcut, ...props }, ref) => {
+  ({ className, placeholder = 'Search Open LMS...', onShortcut, ...props }, ref) => {
     return (
       <div className="relative w-full max-w-xs">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-ink-muted">

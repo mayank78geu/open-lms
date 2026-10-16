@@ -30,7 +30,7 @@ export function Avatar({
 
   const displayText =
     initials ||
-    (name ? name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase() : 'CF');
+    (name ? name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase() : 'OL');
 
   if (src) {
     return (

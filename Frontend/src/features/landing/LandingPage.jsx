@@ -40,13 +40,13 @@ export function LandingPage() {
                 <path d="M2 12l10 5 10-5" />
               </svg>
             </div>
-            <span className="font-extrabold text-xl tracking-tight text-ink">CampusFlow</span>
+            <span className="font-extrabold text-xl tracking-tight text-ink">Open LMS</span>
           </Link>
 
           {/* Navigation Links */}
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-ink-muted">
             <a href="#why" className="hover:text-brand-600 transition-colors">
-              Why CampusFlow
+              Why Open LMS
             </a>
             <a href="#students" className="hover:text-brand-600 transition-colors">
               For students
@@ -95,7 +95,7 @@ export function LandingPage() {
             </h1>
 
             <p className="text-lg text-ink-muted leading-relaxed max-w-xl font-normal">
-              CampusFlow brings classes, assignments, quizzes, feedback, and conversations
+              Open LMS brings classes, assignments, quizzes, feedback, and conversations
               together so everyone can focus on meaningful progress.
             </p>
 
@@ -147,9 +147,9 @@ export function LandingPage() {
               <div className="flex items-center justify-between pb-4 border-b border-slate-100">
                 <div className="flex items-center gap-2">
                   <div className="w-6 h-6 rounded-md bg-brand-500 flex items-center justify-center">
-                    <span className="text-[10px] font-bold text-white">CF</span>
+                    <span className="text-[10px] font-bold text-white">OL</span>
                   </div>
-                  <span className="text-xs font-bold text-ink">CampusFlow</span>
+                  <span className="text-xs font-bold text-ink">Open LMS</span>
                 </div>
                 <div className="flex items-center gap-1.5 text-[11px] text-ink-muted">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -265,15 +265,15 @@ export function LandingPage() {
         <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2 font-semibold text-ink">
             <div className="w-5 h-5 rounded-md bg-brand-500 flex items-center justify-center text-white text-[10px]">
-              CF
+              OL
             </div>
-            CampusFlow
+            Open LMS
           </div>
           <div className="flex items-center gap-6">
             <a href="#privacy" className="hover:text-ink">Privacy</a>
             <a href="#terms" className="hover:text-ink">Terms</a>
             <a href="#accessibility" className="hover:text-ink">Accessibility</a>
-            <span>© 2026 CampusFlow</span>
+            <span>© 2026 Open LMS</span>
           </div>
         </div>
       </footer>

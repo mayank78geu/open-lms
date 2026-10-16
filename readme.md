@@ -1,4 +1,4 @@
-# 🎓 Open LMS (CampusFlow)
+# 🎓 Open LMS
 
 > **A Next-Generation, Full-Stack Learning Management System**  
 > Designed and built for seamless academic collaboration, course delivery, assignment workflows, interactive assessments, and modern grading.
@@ -41,7 +41,7 @@
 
 ## 📖 Overview
 
-**Open LMS** (internally branded as **CampusFlow**) is a modern, unified Learning Management System created to bridge the gap between traditional classroom dynamics and digital education. Built as an MCA 3rd Semester Project-Based Learning (PBL) initiative at **Graphic Era Deemed to be University**, Open LMS replaces disjointed tools with an all-in-one platform for curriculum delivery, submission evaluation, real-time progress tracking, and student-teacher interactions.
+**Open LMS** is a modern, unified Learning Management System created to bridge the gap between traditional classroom dynamics and digital education. Built as an MCA 3rd Semester Project-Based Learning (PBL) initiative at **Graphic Era Deemed to be University**, Open LMS replaces disjointed tools with an all-in-one platform for curriculum delivery, submission evaluation, real-time progress tracking, and student-teacher interactions.
 
 ### Why Open LMS?
 - **Unified Academic Workflow:** Combines courses, assignments, timed quizzes, document rubrics, and direct messaging into one cohesive portal.

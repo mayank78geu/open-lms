@@ -82,7 +82,7 @@ export function Topbar({ title, subtitle }) {
           </button>
 
           {/* Search Bar */}
-          <SearchInput placeholder="Search CampusFlow..." />
+          <SearchInput placeholder="Search Open LMS..." />
 
           {/* Contextual Action Button */}
           {role === 'STUDENT' ? (

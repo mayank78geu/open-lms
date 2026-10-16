@@ -1,6 +1,6 @@
-const TOKEN_KEY = 'campusflow_access_token';
-const REFRESH_KEY = 'campusflow_refresh_token';
-const USER_KEY = 'campusflow_current_user';
+const TOKEN_KEY = 'openlms_access_token';
+const REFRESH_KEY = 'openlms_refresh_token';
+const USER_KEY = 'openlms_current_user';
 
 export const authStorage = {
   getToken: () => {
