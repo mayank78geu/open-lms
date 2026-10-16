@@ -77,7 +77,7 @@ export function Sidebar() {
               <path d="M2 12l10 5 10-5" />
             </svg>
           </div>
-          <span className="font-bold text-lg tracking-tight text-white">CampusFlow</span>
+          <span className="font-bold text-lg tracking-tight text-white">Open LMS</span>
         </div>
 
         {/* Navigation Items */}
@@ -130,13 +130,13 @@ export function Sidebar() {
             <span>Need a hand?</span>
           </div>
           <p className="text-[11px] text-slate-400 leading-snug mb-2">
-            Visit the CampusFlow help center for guides and FAQs.
+            Visit the Open LMS help center for guides and FAQs.
           </p>
           <a
             href="#support"
             onClick={(e) => {
               e.preventDefault();
-              alert('Redirecting to CampusFlow Student Support Center.');
+              alert('Redirecting to Open LMS Student Support Center.');
             }}
             className="text-[11px] font-semibold text-brand-400 hover:text-brand-300 inline-flex items-center gap-1 group"
           >

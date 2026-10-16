@@ -116,9 +116,9 @@ export function QuizTakingPage() {
         {/* Left: Brand */}
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center text-white font-bold text-xs">
-            CF
+            OL
           </div>
-          <span className="font-bold text-base text-ink hidden sm:inline">CampusFlow</span>
+          <span className="font-bold text-base text-ink hidden sm:inline">Open LMS</span>
         </div>
 
         {/* Center: Quiz Metadata */}

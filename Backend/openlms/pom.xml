@@ -11,8 +11,8 @@
 	<groupId>com.lms</groupId>
 	<artifactId>openlms</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name/>
-	<description/>
+	<name>Open LMS</name>
+	<description>Open LMS - Next-Generation Learning Management System</description>
 	<url/>
 	<licenses>
 		<license/>

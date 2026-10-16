@@ -71,7 +71,7 @@ export function StudentSignupPage() {
               <path d="M2 12l10 5 10-5" />
             </svg>
           </div>
-          <span className="font-bold text-lg tracking-tight text-ink">CampusFlow</span>
+          <span className="font-bold text-lg tracking-tight text-ink">Open LMS</span>
         </Link>
         <div className="text-xs text-ink-muted">
           Already registered?{' '}
@@ -441,7 +441,7 @@ export function StudentSignupPage() {
                       size="lg"
                       className="w-full font-bold shadow-sm"
                     >
-                      Join class & enter CampusFlow
+                      Join class & enter Open LMS
                     </Button>
 
                     <div className="text-center pt-2">
@@ -463,7 +463,7 @@ export function StudentSignupPage() {
 
       {/* Footer */}
       <footer className="py-6 text-center text-xs text-ink-muted">
-        © 2026 CampusFlow. Northbridge Academic Ecosystem.
+        © 2026 Open LMS. Northbridge Academic Ecosystem.
       </footer>
     </div>
   );

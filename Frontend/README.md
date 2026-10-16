@@ -1,4 +1,6 @@
-A modern, responsive Learning Management System (LMS) web application built using React 18, Vite, and Tailwind CSS.
+# 🎓 Open LMS - Frontend
+
+A modern, responsive Learning Management System web application for **Open LMS** built using React 18, Vite, and Tailwind CSS.
 
 ## Features
 
@@ -7,7 +9,7 @@ A modern, responsive Learning Management System (LMS) web application built usin
   - **Instructor Portal**: Teaching overview, course management, submissions review, inline document grading with rubrics, and gradebook.
 - **Modern UI & UX**: Clean, accessible design system with responsive layouts, dark navigation sidebar, interactive status badges, and progress rings.
 - **State Management & Routing**: Managed via React Router v6, Zustand for client state, and TanStack Query for server state.
-- **REST API Integration Layer**: Modular HTTP service layer built with Axios, ready for Spring Boot backend integration with fallback mock support.
+- **REST API Integration Layer**: Modular HTTP service layer with mock fallback support and Spring Boot backend integration.
 
 ## Tech Stack
 
@@ -34,7 +36,7 @@ npm install
 ```bash
 npm run dev
 ```
-The application will start on `http://localhost:5173` (or `http://localhost:5174`).
+The application will start on `http://localhost:5173`.
 
 ### Building for Production
 ```bash
@@ -68,15 +70,10 @@ Frontend/
 
 ## Project Diagrams
 
- ERD of OPEN LMS.
+### Entity-Relationship Diagram (ERD)
 
 <img width="1158" height="1358" alt="Open LMS Entity Relationship Diagram" src="https://github.com/user-attachments/assets/6fc48f01-9b6b-4a1f-8c33-dd429c01222e" />
 
- Level 2 DFD of OPEN LMS.
+### Level 2 Data Flow Diagram (DFD)
 
- <img width="1774" height="887" alt="Open LMS Level 2 Data Flow Diagram" src="https://github.com/user-attachments/assets/0d3a87cb-12f8-444b-be62-422c5366f780" />
-
-
-
-
-
+<img width="1774" height="887" alt="Open LMS Level 2 Data Flow Diagram" src="https://github.com/user-attachments/assets/0d3a87cb-12f8-444b-be62-422c5366f780" />

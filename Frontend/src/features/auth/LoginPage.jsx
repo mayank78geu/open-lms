@@ -80,14 +80,14 @@ export function LoginPage() {
               <path d="M2 12l10 5 10-5" />
             </svg>
           </div>
-          <span className="font-bold text-lg tracking-tight text-white">CampusFlow</span>
+          <span className="font-bold text-lg tracking-tight text-white">Open LMS</span>
         </Link>
 
         {/* Testimonial Quote */}
         <div className="my-auto z-10 max-w-md space-y-6">
           <div className="text-brand-400 font-serif text-5xl leading-none">“</div>
           <blockquote className="text-2xl sm:text-3xl font-light text-slate-100 leading-snug">
-            CampusFlow helps me see the whole semester without feeling overwhelmed.
+            Open LMS helps me see the whole semester without feeling overwhelmed.
           </blockquote>
           <div>
             <div className="font-semibold text-white text-base">Rahul Sharma</div>
@@ -102,7 +102,7 @@ export function LoginPage() {
               </div>
               <div>
                 <p className="text-xs font-semibold text-white">Graphic Era University</p>
-                <p className="text-[11px] text-slate-400">Official LMS Academic Portal</p>
+                <p className="text-[11px] text-slate-400">Official Open LMS Academic Portal</p>
               </div>
             </div>
           </div>
@@ -121,9 +121,9 @@ export function LoginPage() {
         <div className="lg:hidden flex items-center justify-between pb-8">
           <Link to="/" className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg bg-brand-500 flex items-center justify-center text-white text-xs font-bold">
-              CF
+              OL
             </div>
-            <span className="font-bold text-base text-ink">CampusFlow</span>
+            <span className="font-bold text-base text-ink">Open LMS</span>
           </Link>
         </div>
 
@@ -134,7 +134,7 @@ export function LoginPage() {
               Welcome back
             </span>
             <h1 className="text-3xl font-extrabold text-ink tracking-tight mb-2">
-              Sign in to CampusFlow
+              Sign in to Open LMS
             </h1>
             <p className="text-sm text-ink-muted">
               Pick up right where you left off.
@@ -260,7 +260,7 @@ export function LoginPage() {
 
           {/* Create Account link */}
           <div className="text-center mt-6 text-xs text-ink-muted">
-            New to CampusFlow?{' '}
+            New to Open LMS?{' '}
             <Link to="/choose-role" className="font-bold text-brand-600 hover:underline">
               Create an account
             </Link>
@@ -274,7 +274,7 @@ export function LoginPage() {
             <a href="#terms" className="hover:text-ink">Terms</a>
             <a href="#accessibility" className="hover:text-ink">Accessibility</a>
           </div>
-          <span>© 2026 CampusFlow</span>
+          <span>© 2026 Open LMS</span>
         </div>
       </div>
     </div>

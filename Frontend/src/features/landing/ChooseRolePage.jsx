@@ -38,7 +38,7 @@ export function ChooseRolePage() {
               <path d="M2 12l10 5 10-5" />
             </svg>
           </div>
-          <span className="font-bold text-lg tracking-tight text-ink">CampusFlow</span>
+          <span className="font-bold text-lg tracking-tight text-ink">Open LMS</span>
         </Link>
         <div className="text-xs text-ink-muted">
           Need help?{' '}
@@ -46,7 +46,7 @@ export function ChooseRolePage() {
             href="#support"
             onClick={(e) => {
               e.preventDefault();
-              alert('Support contact: support@campusflow.edu');
+              alert('Support contact: support@openlms.edu');
             }}
             className="text-brand-600 font-semibold hover:underline"
           >
@@ -60,10 +60,10 @@ export function ChooseRolePage() {
         {/* Header copy */}
         <div className="text-center mb-10">
           <span className="text-xs font-bold uppercase tracking-widest text-brand-600 mb-2 block">
-            Welcome to CampusFlow
+            Welcome to Open LMS
           </span>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-ink tracking-tight mb-3">
-            How will you use CampusFlow?
+            How will you use Open LMS?
           </h1>
           <p className="text-sm text-ink-muted max-w-md mx-auto">
             Choose your role so we can shape the right workspace for you.
@@ -201,7 +201,7 @@ export function ChooseRolePage() {
       </main>
 
       <footer className="py-6 text-center text-xs text-ink-muted">
-        © 2026 CampusFlow. Northbridge Academic Ecosystem.
+        © 2026 Open LMS. Northbridge Academic Ecosystem.
       </footer>
     </div>
   );
