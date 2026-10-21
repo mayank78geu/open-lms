@@ -12,13 +12,13 @@ export function LoginPage() {
 
   const allowedDomain = import.meta.env.VITE_ALLOWED_EMAIL_DOMAIN;
   const defaultDomain = allowedDomain || 'geu.edu';
-  const [email, setEmail] = useState(`rahul.sharma@${defaultDomain}`);
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [keepSignedIn, setKeepSignedIn] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
@@ -29,20 +29,21 @@ export function LoginPage() {
 
     setIsLoading(true);
 
-    setTimeout(() => {
+    try {
+      const user = await login(email, password, undefined, keepSignedIn);
       setIsLoading(false);
-     
-      const isProf = email.toLowerCase().includes('priya') || email.toLowerCase().includes('prof');
-      const role = isProf ? 'PROFESSOR' : 'STUDENT';
-      login(email, password, role);
 
       const redirect = searchParams.get('redirect');
       if (redirect) {
         navigate(redirect);
       } else {
-        navigate(role === 'PROFESSOR' ? '/professor/overview' : '/student/home');
+        navigate(user.role === 'PROFESSOR'
+          ? '/professor/overview' : '/student/home');
       }
-    }, 600);
+    } catch (err) {
+      setIsLoading(false);
+      setError(err.message || 'Unable to sign in.');
+    }
   };
 
   const fillQuickUser = (role) => {
@@ -169,8 +170,7 @@ export function LoginPage() {
           <button
             type="button"
             onClick={() => {
-              login(`rahul.sharma@${defaultDomain}`, 'password', 'STUDENT');
-              navigate('/student/home');
+              setError('Google sign-in is not configured. Please use your registered email and password.');
             }}
             className="w-full py-2.5 px-4 rounded-xl border border-ink-border hover:bg-slate-50 text-ink text-sm font-semibold flex items-center justify-center gap-3 transition-colors shadow-2xs"
           >

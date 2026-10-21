@@ -346,9 +346,13 @@ The frontend includes a built-in mock fallback with full student and professor d
 ```properties
 # Set to 'true' for offline standalone mode (uses realistic fixtures)
 # Set to 'false' to communicate with the Spring Boot server
-VITE_USE_MOCKS=true
+VITE_USE_MOCKS=false
 VITE_API_BASE_URL=http://localhost:8081/api/v1
 ```
+
+Set `VITE_USE_MOCKS=true` only when running the frontend without the backend. With
+`VITE_USE_MOCKS=false`, registration and login use the Spring Boot authentication
+endpoints and credentials are stored in the configured MySQL database.
 
 #### C. Run Development Server
 ```bash

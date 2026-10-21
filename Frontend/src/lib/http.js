@@ -11,8 +11,8 @@ export async function apiRequest(endpoint, options = {}) {
 
   // In mock mode, this resolves mock responses directly
   // When VITE_USE_MOCKS is false, it uses fetch against VITE_API_BASE_URL
-  const useMocks = import.meta.env.VITE_USE_MOCKS !== 'false';
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
+  const useMocks = import.meta.env.VITE_USE_MOCKS === 'true';
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081/api/v1';
 
   if (!useMocks) {
     try {
@@ -32,7 +32,14 @@ export async function apiRequest(endpoint, options = {}) {
 
       return await response.json();
     } catch (err) {
-      console.warn('Backend unavailable, falling back to mock fixtures', err);
+      if (err?.status) {
+        throw err;
+      }
+      throw {
+        status: 0,
+        message: 'Unable to connect to the backend. Make sure the Spring Boot server is running.',
+        fieldErrors: [],
+      };
     }
   }
 
