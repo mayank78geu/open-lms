@@ -8,35 +8,39 @@ import { cn } from '../../lib/utils';
 
 export function StudentSignupPage() {
   const navigate = useNavigate();
-  const { login } = useAuthStore();
+  const { register } = useAuthStore();
 
   const allowedDomain = import.meta.env.VITE_ALLOWED_EMAIL_DOMAIN;
   const defaultDomain = allowedDomain || 'geu.edu';
 
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
-    firstName: 'Rahul',
-    lastName: 'Sharma',
-    email: `rahul.sharma@${defaultDomain}`,
-    password: 'password123!',
-    confirmPassword: 'password123!',
-    agreedToTerms: true,
-    program: 'Computer Science',
-    year: 'MCA · Year 2',
-    studentId: 'GEU-2027-8492',
-    classCode: 'BIO214',
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    agreedToTerms: false,
+    program: '',
+    year: '',
+    studentId: '',
+    classCode: '',
   });
 
-  const [passwordStrength, setPasswordStrength] = useState('Strong password');
-  const [emailError, setEmailError] = useState('');
+  const [passwordStrength, setPasswordStrength] = useState('');
+  const [formError, setFormError] = useState('');
 
   const handleStep1Submit = (e) => {
     e.preventDefault();
+    setFormError('');
     if (allowedDomain && !formData.email.toLowerCase().endsWith('@' + allowedDomain.toLowerCase())) {
-      setEmailError(`Please use a valid @${allowedDomain} email address.`);
+      setFormError(`Please use a valid @${allowedDomain} email address.`);
       return;
     }
-    setEmailError('');
+    if (formData.password !== formData.confirmPassword) {
+      setFormError('Passwords do not match.');
+      return;
+    }
     setCurrentStep(2);
   };
 
@@ -45,10 +49,19 @@ export function StudentSignupPage() {
     setCurrentStep(3);
   };
 
-  const handleCompleteSignup = (e) => {
+  const handleCompleteSignup = async (e) => {
     if (e) e.preventDefault();
-    login(formData.email, formData.password, 'STUDENT');
-    navigate('/student/home');
+    setFormError('');
+    try {
+      await register({
+        name: `${formData.firstName} ${formData.lastName}`.trim(),
+        email: formData.email,
+        password: formData.password,
+      });
+      navigate('/student/home');
+    } catch (err) {
+      setFormError(err.message || 'Unable to create your account.');
+    }
   };
 
   return (
@@ -208,9 +221,9 @@ export function StudentSignupPage() {
                       label="University email"
                       type="email"
                       value={formData.email}
-                      error={emailError}
+                      error={formError}
                       onChange={(e) => {
-                        setEmailError('');
+                        setFormError('');
                         setFormData({ ...formData, email: e.target.value });
                       }}
                       placeholder={`rahul.sharma@${defaultDomain}`}

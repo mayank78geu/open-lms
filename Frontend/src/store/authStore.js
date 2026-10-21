@@ -1,24 +1,52 @@
 import { create } from 'zustand';
 import { authStorage } from '../lib/auth';
 import { MOCK_USERS } from '../mocks/mockData';
+import { apiRequest } from '../lib/http';
 
-// Initial user defaults to student (Rahul Sharma) for immediate exploration
-const savedUser = authStorage.getUser() || MOCK_USERS.student;
+const useMocks = import.meta.env.VITE_USE_MOCKS === 'true';
+const savedUser = authStorage.getUser() || (useMocks ? MOCK_USERS.student : null);
 
 export const useAuthStore = create((set, get) => ({
   user: savedUser,
-  isAuthenticated: true,
-  role: savedUser?.role || 'STUDENT',
+  isAuthenticated: useMocks ? Boolean(savedUser) : Boolean(savedUser && authStorage.getToken()),
+  role: savedUser?.role || null,
 
-  login: (email, password, role = 'STUDENT') => {
+  login: async (email, password, role = 'STUDENT', remember = true) => {
+    if (!useMocks) {
+      const user = await apiRequest('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password }),
+      });
+      authStorage.setToken(user.token, remember);
+      authStorage.setUser(user, remember);
+      set({ user, isAuthenticated: true, role: user.role });
+      return user;
+    }
     const userToSet = role === 'PROFESSOR' ? MOCK_USERS.professor : MOCK_USERS.student;
-    authStorage.setToken('mock-jwt-token-' + Date.now());
-    authStorage.setUser(userToSet);
+    authStorage.setToken('mock-jwt-token-' + Date.now(), remember);
+    authStorage.setUser(userToSet, remember);
     set({ user: userToSet, isAuthenticated: true, role: userToSet.role });
     return userToSet;
   },
 
+  register: async ({ name, email, password }, remember = true) => {
+    if (useMocks) {
+      return get().login(email, password, 'STUDENT', remember);
+    }
+    const user = await apiRequest('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ name, email, password, roleName: 'STUDENT' }),
+    });
+    authStorage.setToken(user.token, remember);
+    authStorage.setUser(user, remember);
+    set({ user, isAuthenticated: true, role: user.role });
+    return user;
+  },
+
   switchRole: (newRole) => {
+    if (!useMocks) {
+      return;
+    }
     const newUser = newRole === 'PROFESSOR' ? MOCK_USERS.professor : MOCK_USERS.student;
     authStorage.setUser(newUser);
     set({ user: newUser, role: newRole });
