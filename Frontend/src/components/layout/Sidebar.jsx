@@ -22,9 +22,11 @@ import { Avatar } from '../ui/Avatar';
 import { useAuthStore } from '../../store/authStore';
 
 export function Sidebar() {
-  const { user, role, logout, switchRole } = useAuthStore();
+  const { user, role, logout } = useAuthStore();
   const navigate = useNavigate();
   const [showUserMenu, setShowUserMenu] = useState(false);
+
+  const isProf = role === 'PROFESSOR' || role === 'FACULTY';
 
   const studentNav = [
     { label: 'Home', to: '/student/home', icon: Home },
@@ -42,14 +44,7 @@ export function Sidebar() {
     { label: 'Messages', to: '/messages', icon: MessageSquare },
   ];
 
-  const navItems = role === 'PROFESSOR' ? professorNav : studentNav;
-
-  const handleRoleToggle = () => {
-    const nextRole = role === 'PROFESSOR' ? 'STUDENT' : 'PROFESSOR';
-    switchRole(nextRole);
-    navigate(nextRole === 'PROFESSOR' ? '/professor/overview' : '/student/home');
-    setShowUserMenu(false);
-  };
+  const navItems = isProf ? professorNav : studentNav;
 
   const handleLogout = () => {
     logout();
@@ -156,14 +151,14 @@ export function Sidebar() {
               <Avatar
                 initials={user?.avatarInitials}
                 size="sm"
-                color={role === 'PROFESSOR' ? 'blue' : 'brand'}
+                color={isProf ? 'blue' : 'brand'}
               />
               <div className="overflow-hidden">
                 <div className="text-xs font-semibold text-white truncate">
-                  {user?.name}
+                  {user?.name || 'Account'}
                 </div>
                 <div className="text-[10px] text-slate-400 truncate">
-                  {role === 'PROFESSOR' ? 'Professor · Biology' : 'Student · Year 2'}
+                  {isProf ? 'Faculty / Professor' : 'Student Account'}
                 </div>
               </div>
             </div>
@@ -177,17 +172,29 @@ export function Sidebar() {
 
           {/* User Popover Menu */}
           {showUserMenu && (
-            <div className="absolute bottom-full left-0 right-0 mb-2 p-1.5 bg-navy-800 border border-navy-700 rounded-xl shadow-hero z-40 text-xs">
+            <div className="absolute bottom-full left-0 right-0 mb-2 p-1.5 bg-navy-800 border border-navy-700 rounded-xl shadow-hero z-40 text-xs space-y-1">
+              <div className="px-2.5 py-1.5 border-b border-navy-700/80 mb-1">
+                <p className="text-white font-semibold truncate">{user?.name}</p>
+                <p className="text-[10px] text-slate-400 truncate">{user?.email}</p>
+                <span className="inline-block mt-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-navy-700 text-brand-300">
+                  {isProf ? 'Professor' : 'Student'}
+                </span>
+              </div>
               <button
-                onClick={handleRoleToggle}
-                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-slate-200 hover:text-white hover:bg-navy-700 transition-colors"
+                type="button"
+                onClick={() => {
+                  setShowUserMenu(false);
+                  navigate('/messages');
+                }}
+                className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-200 hover:text-white hover:bg-navy-700 transition-colors"
               >
-                <Sparkles className="w-3.5 h-3.5 text-brand-400" />
-                <span>Switch to {role === 'PROFESSOR' ? 'Student' : 'Professor'} view</span>
+                <MessageSquare className="w-3.5 h-3.5 text-slate-400" />
+                <span>Messages & Help</span>
               </button>
               <button
+                type="button"
                 onClick={handleLogout}
-                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-rose-300 hover:text-rose-200 hover:bg-rose-900/30 transition-colors"
+                className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-rose-300 hover:text-rose-200 hover:bg-rose-900/30 transition-colors"
               >
                 <LogOut className="w-3.5 h-3.5" />
                 <span>Sign out</span>

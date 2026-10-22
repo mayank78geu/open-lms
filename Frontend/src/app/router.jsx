@@ -56,6 +56,10 @@ export const router = createBrowserRouter([
     element: <StudentSignupPage />,
   },
   {
+    path: '/signup/teacher',
+    element: <StudentSignupPage />,
+  },
+  {
     path: '/health',
     element: <ApiHealthPage />,
   },

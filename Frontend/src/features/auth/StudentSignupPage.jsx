@@ -1,26 +1,25 @@
 import React, { useState } from 'react';
-import { useAuth, useSignIn } from '@clerk/clerk-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '../../components/ui/Button';
 import { Input, PasswordInput } from '../../components/ui/Input';
 import { useAuthStore } from '../../store/authStore';
+import { promptGoogleLogin } from '../../lib/googleAuth';
 import { joinCourse } from '../../lib/api/coursesApi';
-import { ShieldCheck, Check, ArrowRight } from 'lucide-react';
+import { ShieldCheck, Check, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 export function StudentSignupPage() {
-  const { signIn, isLoaded: isClerkLoaded } = useSignIn();
-  const { isSignedIn } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const { register } = useAuthStore();
-  const isProfessor = location.pathname.includes('professor');
+  const { register, googleLogin, login, isAuthenticated, user: currentUser } = useAuthStore();
+  const isProfessor = location.pathname.includes('professor') || location.pathname.includes('teacher');
   const roleName = isProfessor ? 'FACULTY' : 'STUDENT';
 
   const allowedDomain = import.meta.env.VITE_ALLOWED_EMAIL_DOMAIN;
   const defaultDomain = allowedDomain || 'geu.edu';
 
   const [currentStep, setCurrentStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -36,31 +35,6 @@ export function StudentSignupPage() {
 
   const [passwordStrength, setPasswordStrength] = useState('');
   const [formError, setFormError] = useState('');
-
-  const handleGoogleSignup = async () => {
-    setFormError('');
-    if (!isClerkLoaded) {
-      setFormError('Sign-up is still loading. Please try again.');
-      return;
-    }
-
-    try {
-      const origin = window.location.origin;
-      if (isSignedIn) {
-        navigate('/sso-complete', { replace: true });
-        return;
-      }
-
-      window.sessionStorage.setItem('openlms_pending_role', roleName);
-      await signIn.authenticateWithRedirect({
-        strategy: 'oauth_google',
-        redirectUrl: `${origin}/sso-callback`,
-        redirectUrlComplete: `${origin}/sso-complete`,
-      });
-    } catch (err) {
-      setFormError(err.errors?.[0]?.longMessage || err.message || 'Unable to sign up with Google.');
-    }
-  };
 
   const handleStep1Submit = (e) => {
     e.preventDefault();
@@ -81,18 +55,51 @@ export function StudentSignupPage() {
     setCurrentStep(3);
   };
 
-  const handleCompleteSignup = async (e) => {
-    if (e) e.preventDefault();
+  const handleCompleteSignup = async (e, skipClassCode = false) => {
+    if (e && e.preventDefault) e.preventDefault();
     setFormError('');
-    try {
-      const user = await register({
-        name: `${formData.firstName} ${formData.lastName}`.trim(),
-        email: formData.email,
-        password: formData.password,
-        roleName,
-      });
 
-      if (!isProfessor && formData.classCode && formData.classCode.trim()) {
+    // If already authenticated, redirect straight to dashboard
+    if (isAuthenticated && currentUser) {
+      if (isProfessor || currentUser?.role === 'FACULTY' || currentUser?.role === 'PROFESSOR') {
+        navigate('/professor/overview');
+      } else {
+        navigate('/student/home');
+      }
+      return;
+    }
+
+    if (!formData.email || !formData.password) {
+      setCurrentStep(1);
+      setFormError('Please enter your email and password.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      let user;
+      try {
+        user = await register({
+          name: `${formData.firstName} ${formData.lastName}`.trim() || formData.email.split('@')[0],
+          email: formData.email.trim(),
+          password: formData.password,
+          roleName,
+        });
+      } catch (regErr) {
+        const msg = (regErr?.message || '').toLowerCase();
+        if (msg.includes('already registered') || regErr?.status === 409) {
+          // Attempt automatic login with the provided credentials
+          try {
+            user = await login(formData.email.trim(), formData.password, roleName);
+          } catch {
+            throw new Error('An account with this email already exists. Please sign in to continue.');
+          }
+        } else {
+          throw regErr;
+        }
+      }
+
+      if (!isProfessor && !skipClassCode && formData.classCode && formData.classCode.trim()) {
         try {
           await joinCourse({ courseCode: formData.classCode.trim() });
         } catch (joinErr) {
@@ -106,8 +113,33 @@ export function StudentSignupPage() {
         navigate('/student/home');
       }
     } catch (err) {
-      setFormError(err.message || 'Unable to create your account.');
+      setFormError(err.message || 'Unable to complete sign-up.');
+    } finally {
+      setIsSubmitting(false);
     }
+  };
+
+  const handleGoogleSignUp = () => {
+    setFormError('');
+    promptGoogleLogin({
+      roleName,
+      onStart: () => {},
+      onSuccess: async ({ accessToken }) => {
+        try {
+          const user = await googleLogin({ accessToken, roleName });
+          if (roleName === 'FACULTY' || user?.role === 'FACULTY' || user?.role === 'PROFESSOR') {
+            navigate('/professor/overview');
+          } else {
+            navigate('/student/home');
+          }
+        } catch (err) {
+          setFormError(err.message || 'Google sign-up failed on server.');
+        }
+      },
+      onError: (errMsg) => {
+        setFormError(errMsg);
+      },
+    });
   };
 
   return (
@@ -216,8 +248,12 @@ export function StudentSignupPage() {
                   3
                 </div>
                 <div>
-                  <div className="text-sm font-bold text-ink">Join your first class</div>
-                  <div className="text-xs text-ink-muted">Use a 6 digit class code</div>
+                  <div className="text-sm font-bold text-ink">
+                    {isProfessor ? 'Teaching workspace' : 'Join your first class'}
+                  </div>
+                  <div className="text-xs text-ink-muted">
+                    {isProfessor ? 'Access faculty portal' : 'Use a 6 digit class code'}
+                  </div>
                 </div>
               </div>
             </div>
@@ -234,6 +270,22 @@ export function StudentSignupPage() {
           {/* Right Column: Form Card */}
           <div className="lg:col-span-7">
             <div className="bg-white rounded-3xl p-8 border border-ink-border shadow-soft">
+              {formError && (
+                <div className="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-sm text-rose-700 flex flex-col gap-2">
+                  <div className="flex items-start gap-2 font-medium">
+                    <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
+                    <span>{formError}</span>
+                  </div>
+                  {formError.toLowerCase().includes('already') && (
+                    <div className="flex items-center gap-2 pt-2 border-t border-rose-200/60">
+                      <span className="text-xs text-rose-600">Already registered?</span>
+                      <Link to="/login" className="text-xs font-bold text-rose-800 underline hover:text-rose-900">
+                        Sign in to your account →
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              )}
               {currentStep === 1 && (
                 <div>
                   <div className="mb-6">
@@ -363,7 +415,7 @@ export function StudentSignupPage() {
                   {/* Google */}
                   <button
                     type="button"
-                    onClick={handleGoogleSignup}
+                    onClick={handleGoogleSignUp}
                     className="w-full py-2.5 px-4 rounded-xl border border-ink-border hover:bg-slate-50 text-ink text-xs font-semibold flex items-center justify-center gap-2.5 transition-colors"
                   >
                     <svg className="w-4 h-4" viewBox="0 0 24 24">
@@ -460,7 +512,7 @@ export function StudentSignupPage() {
                         size="md"
                         className="flex-1 font-bold"
                       >
-                        Continue to class join
+                        {isProfessor ? 'Continue to workspace' : 'Continue to class join'}
                       </Button>
                     </div>
                   </form>
@@ -470,48 +522,60 @@ export function StudentSignupPage() {
               {currentStep === 3 && (
                 <div>
                   <div className="mb-6">
-                    <h2 className="text-xl font-bold text-ink">Join your first class</h2>
+                    <h2 className="text-xl font-bold text-ink">
+                      {isProfessor ? 'Welcome to your teaching workspace' : 'Join your first class'}
+                    </h2>
                     <p className="text-xs text-ink-muted mt-1">
-                      Enter the 6-digit class code provided by your instructor or department.
+                      {isProfessor
+                        ? 'Your faculty space is ready. Set up course modules, assignments, and grade rosters.'
+                        : 'Enter the 6-digit class code provided by your instructor or department.'}
                     </p>
                   </div>
 
-                  <form onSubmit={handleCompleteSignup} className="space-y-6">
-                    <div>
-                      <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-2">
-                        6-Digit Class Code
-                      </label>
-                      <input
-                        type="text"
-                        maxLength={6}
-                        value={formData.classCode}
-                        onChange={(e) =>
-                          setFormData({ ...formData, classCode: e.target.value.toUpperCase() })
-                        }
-                        placeholder="BIO214"
-                        className="w-full text-center tracking-widest text-2xl font-mono font-bold uppercase py-4 border border-ink-border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-400"
-                      />
-                      <p className="text-xs text-ink-muted mt-2 text-center">
-                        Example: <span className="font-semibold text-brand-600">BIO214</span> (Cell Biology)
-                      </p>
-                    </div>
+                  <form onSubmit={(e) => handleCompleteSignup(e, false)} className="space-y-6">
+                    {!isProfessor && (
+                      <div>
+                        <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-2">
+                          6-Digit Class Code
+                        </label>
+                        <input
+                          type="text"
+                          maxLength={6}
+                          value={formData.classCode}
+                          onChange={(e) =>
+                            setFormData({ ...formData, classCode: e.target.value.toUpperCase() })
+                          }
+                          placeholder="BIO214"
+                          className="w-full text-center tracking-widest text-2xl font-mono font-bold uppercase py-4 border border-ink-border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-400"
+                        />
+                        <p className="text-xs text-ink-muted mt-2 text-center">
+                          Example: <span className="font-semibold text-brand-600">BIO214</span> (Cell Biology)
+                        </p>
+                      </div>
+                    )}
 
                     <Button
                       type="submit"
                       variant="primary"
                       size="lg"
+                      disabled={isSubmitting}
                       className="w-full font-bold shadow-sm"
                     >
-                      Join class & enter Open LMS
+                      {isSubmitting
+                        ? 'Entering Open LMS...'
+                        : isProfessor
+                        ? 'Enter Faculty Dashboard →'
+                        : 'Join class & enter Open LMS'}
                     </Button>
 
                     <div className="text-center pt-2">
                       <button
                         type="button"
-                        onClick={() => handleCompleteSignup()}
-                        className="text-xs font-semibold text-ink-muted hover:text-ink underline"
+                        disabled={isSubmitting}
+                        onClick={(e) => handleCompleteSignup(e, true)}
+                        className="text-xs font-semibold text-ink-muted hover:text-ink underline disabled:opacity-50 cursor-pointer"
                       >
-                        Skip for now, go to dashboard →
+                        {isSubmitting ? 'Redirecting to dashboard...' : 'Skip for now, go to dashboard →'}
                       </button>
                     </div>
                   </form>

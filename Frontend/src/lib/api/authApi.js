@@ -57,3 +57,24 @@ export async function getMe() {
   }
   return apiRequest('/auth/me');
 }
+
+export async function googleLogin(payload) {
+  if (useMocks) {
+    const role = (payload.roleName || 'STUDENT').toUpperCase();
+    const mock = role === 'FACULTY' || role === 'PROFESSOR' ? MOCK_USERS.professor : MOCK_USERS.student;
+    return {
+      userId: 1,
+      name: mock.name,
+      email: mock.email,
+      role: role === 'PROFESSOR' ? 'FACULTY' : role,
+      roleId: role === 'FACULTY' || role === 'PROFESSOR' ? 2 : 1,
+      token: 'mock-jwt-token-' + Date.now(),
+      isActive: true,
+    };
+  }
+  return apiRequest('/auth/google', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
