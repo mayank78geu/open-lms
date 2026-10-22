@@ -1,14 +1,28 @@
 package com.lms.openlms.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 public class CourseDto {
 
     public static class CreateCourseRequest {
+        @NotBlank(message = "Course name is required")
+        @Size(min = 2, max = 150, message = "Course name must be between 2 and 150 characters")
         private String courseName;
-        private String courseCode;
-        private Long professorId;
+
+        @Size(max = 2000, message = "Description must not exceed 2000 characters")
         private String description;
 
+        @Size(max = 50, message = "Section must not exceed 50 characters")
+        private String section;
+
         public CreateCourseRequest() {}
+
+        public CreateCourseRequest(String courseName, String description, String section) {
+            this.courseName = courseName;
+            this.description = description;
+            this.section = section;
+        }
 
         public String getCourseName() {
             return courseName;
@@ -18,20 +32,48 @@ public class CourseDto {
             this.courseName = courseName;
         }
 
-        public String getCourseCode() {
-            return courseCode;
+        public String getDescription() {
+            return description;
         }
 
-        public void setCourseCode(String courseCode) {
-            this.courseCode = courseCode;
+        public void setDescription(String description) {
+            this.description = description;
         }
 
-        public Long getProfessorId() {
-            return professorId;
+        public String getSection() {
+            return section;
         }
 
-        public void setProfessorId(Long professorId) {
-            this.professorId = professorId;
+        public void setSection(String section) {
+            this.section = section;
+        }
+    }
+
+    public static class UpdateCourseRequest {
+        @NotBlank(message = "Course name is required")
+        @Size(min = 2, max = 150, message = "Course name must be between 2 and 150 characters")
+        private String courseName;
+
+        @Size(max = 2000, message = "Description must not exceed 2000 characters")
+        private String description;
+
+        @Size(max = 50, message = "Section must not exceed 50 characters")
+        private String section;
+
+        public UpdateCourseRequest() {}
+
+        public UpdateCourseRequest(String courseName, String description, String section) {
+            this.courseName = courseName;
+            this.description = description;
+            this.section = section;
+        }
+
+        public String getCourseName() {
+            return courseName;
+        }
+
+        public void setCourseName(String courseName) {
+            this.courseName = courseName;
         }
 
         public String getDescription() {
@@ -41,19 +83,58 @@ public class CourseDto {
         public void setDescription(String description) {
             this.description = description;
         }
+
+        public String getSection() {
+            return section;
+        }
+
+        public void setSection(String section) {
+            this.section = section;
+        }
+    }
+
+    public static class JoinCourseRequest {
+        @NotBlank(message = "Course code is required")
+        private String courseCode;
+
+        public JoinCourseRequest() {}
+
+        public JoinCourseRequest(String courseCode) {
+            this.courseCode = courseCode;
+        }
+
+        public String getCourseCode() {
+            return courseCode;
+        }
+
+        public void setCourseCode(String courseCode) {
+            this.courseCode = courseCode;
+        }
     }
 
     public static class CourseResponse {
         private Long courseId;
         private String courseName;
         private String courseCode;
+        private String description;
+        private String section;
         private Long professorId;
         private String professorName;
-        private String professorEmail;
-        private Long enrolledStudentsCount;
-        private String description;
+        private long enrollmentCount;
 
         public CourseResponse() {}
+
+        public CourseResponse(Long courseId, String courseName, String courseCode, String description,
+                              String section, Long professorId, String professorName, long enrollmentCount) {
+            this.courseId = courseId;
+            this.courseName = courseName;
+            this.courseCode = courseCode;
+            this.description = description;
+            this.section = section;
+            this.professorId = professorId;
+            this.professorName = professorName;
+            this.enrollmentCount = enrollmentCount;
+        }
 
         public Long getCourseId() {
             return courseId;
@@ -83,6 +164,22 @@ public class CourseDto {
             this.courseCode = courseCode;
         }
 
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
+
+        public String getSection() {
+            return section;
+        }
+
+        public void setSection(String section) {
+            this.section = section;
+        }
+
         public Long getProfessorId() {
             return professorId;
         }
@@ -99,51 +196,50 @@ public class CourseDto {
             this.professorName = professorName;
         }
 
-        public String getProfessorEmail() {
-            return professorEmail;
+        public long getEnrollmentCount() {
+            return enrollmentCount;
         }
 
-        public void setProfessorEmail(String professorEmail) {
-            this.professorEmail = professorEmail;
-        }
-
-        public Long getEnrolledStudentsCount() {
-            return enrolledStudentsCount;
-        }
-
-        public void setEnrolledStudentsCount(Long enrolledStudentsCount) {
-            this.enrolledStudentsCount = enrolledStudentsCount;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-
-        public void setDescription(String description) {
-            this.description = description;
+        public void setEnrollmentCount(long enrollmentCount) {
+            this.enrollmentCount = enrollmentCount;
         }
     }
 
-    public static class EnrollRequest {
-        private Long studentId;
-        private String courseCode;
+    public static class StudentItem {
+        private Long userId;
+        private String name;
+        private String email;
 
-        public EnrollRequest() {}
+        public StudentItem() {}
 
-        public Long getStudentId() {
-            return studentId;
+        public StudentItem(Long userId, String name, String email) {
+            this.userId = userId;
+            this.name = name;
+            this.email = email;
         }
 
-        public void setStudentId(Long studentId) {
-            this.studentId = studentId;
+        public Long getUserId() {
+            return userId;
         }
 
-        public String getCourseCode() {
-            return courseCode;
+        public void setUserId(Long userId) {
+            this.userId = userId;
         }
 
-        public void setCourseCode(String courseCode) {
-            this.courseCode = courseCode;
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
         }
     }
 }

@@ -20,10 +20,10 @@ public class Course {
     @JoinColumn(name = "professor_id", nullable = false)
     private User professor;
 
-    @Transient
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    @Transient
+    @Column(name = "section", nullable = false, length = 50)
     private String section = "Section 01";
 
     public Course() {}
