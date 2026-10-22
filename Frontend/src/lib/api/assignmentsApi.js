@@ -1,5 +1,23 @@
 import { apiRequest } from '../http';
-import { MOCK_STUDENT_ASSIGNMENTS } from '../../mocks/mockData';
+
+const DEFAULT_MOCK_ASSIGNMENTS = [
+  {
+    title: 'Lab reflection 03: Membrane transport',
+    summary: 'Analyze diffusion rates across dialysis tubing.',
+    course: 'Cell Biology',
+    dueIso: '2026-11-05T23:59:00',
+    points: 20,
+    status: 'pending',
+  },
+  {
+    title: 'Design critique: Figma mobile mockup',
+    summary: 'Submit mobile wireframes and micro-interaction flows.',
+    course: 'Interaction Design',
+    dueIso: '2026-11-06T14:00:00',
+    points: 15,
+    status: 'pending',
+  },
+];
 
 const useMocks = import.meta.env.VITE_USE_MOCKS === 'true';
 
@@ -22,7 +40,7 @@ export async function createAssignment(courseId, data) {
 
 export async function listCourseAssignments(courseId) {
   if (useMocks) {
-    return MOCK_STUDENT_ASSIGNMENTS.map((a, i) => ({
+    return DEFAULT_MOCK_ASSIGNMENTS.map((a, i) => ({
       assignmentId: i + 1,
       courseId: Number(courseId),
       title: a.title,
@@ -37,7 +55,7 @@ export async function listCourseAssignments(courseId) {
 
 export async function listMyAssignments() {
   if (useMocks) {
-    return MOCK_STUDENT_ASSIGNMENTS.map((a, i) => ({
+    return DEFAULT_MOCK_ASSIGNMENTS.map((a, i) => ({
       assignmentId: i + 1,
       courseId: 1,
       courseName: a.course,
@@ -53,7 +71,7 @@ export async function listMyAssignments() {
 
 export async function getAssignment(assignmentId) {
   if (useMocks) {
-    const a = MOCK_STUDENT_ASSIGNMENTS[0] || {};
+    const a = DEFAULT_MOCK_ASSIGNMENTS[0] || {};
     return {
       assignmentId: Number(assignmentId),
       courseId: 1,

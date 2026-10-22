@@ -1,5 +1,14 @@
 import { apiRequest } from '../http';
-import { MOCK_GRADEBOOK } from '../../mocks/mockData';
+
+const DEFAULT_MOCK_GRADEBOOK = {
+  columns: [
+    { key: 'a1', name: 'Lab reflection 02', type: 'ASSIGNMENT', total: 20 },
+    { key: 'q1', name: 'Quiz 1: Organelles', type: 'QUIZ', total: 20 },
+  ],
+  students: [
+    { name: 'Rahul Sharma', overallGrade: 92, letterGrade: 'A', scores: { a1: 18.5, q1: 19 } },
+  ],
+};
 
 const useMocks = import.meta.env.VITE_USE_MOCKS === 'true';
 
@@ -8,7 +17,7 @@ export async function getCourseGradebook(courseId) {
     return {
       courseId: Number(courseId),
       courseName: 'Cell Biology',
-      students: MOCK_GRADEBOOK.students.map((s, i) => ({
+      students: DEFAULT_MOCK_GRADEBOOK.students.map((s, i) => ({
         studentId: i + 1,
         studentName: s.name,
         email: `${s.name.toLowerCase().replace(/\s+/g, '.')}@geu.edu`,
@@ -16,7 +25,7 @@ export async function getCourseGradebook(courseId) {
         letterGrade: s.letterGrade,
         scores: s.scores,
       })),
-      assignments: MOCK_GRADEBOOK.columns.map((c) => ({
+      assignments: DEFAULT_MOCK_GRADEBOOK.columns.map((c) => ({
         id: c.key,
         title: c.name,
         type: c.type,

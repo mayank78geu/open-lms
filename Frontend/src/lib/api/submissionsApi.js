@@ -1,5 +1,16 @@
 import { apiRequest } from '../http';
-import { MOCK_PROFESSOR_SUBMISSIONS } from '../../mocks/mockData';
+
+const DEFAULT_MOCK_SUBMISSIONS = [
+  {
+    assignmentId: 1,
+    assignment: 'Lab reflection 03',
+    student: 'Rahul Sharma',
+    submittedIso: '2026-10-18T14:30:00',
+    grade: '92%',
+    status: 'reviewed',
+    feedback: 'Excellent analytical observations.',
+  },
+];
 
 const useMocks = import.meta.env.VITE_USE_MOCKS === 'true';
 
@@ -44,7 +55,7 @@ export async function getMySubmission(assignmentId) {
 
 export async function listAssignmentSubmissions(assignmentId) {
   if (useMocks) {
-    return MOCK_PROFESSOR_SUBMISSIONS.filter(
+    return DEFAULT_MOCK_SUBMISSIONS.filter(
       (s) => !assignmentId || String(s.assignmentId) === String(assignmentId)
     ).map((s, i) => ({
       submissionId: i + 1,
@@ -88,12 +99,12 @@ export async function listMySubmissions() {
 
 export async function listSubmissions(params = {}) {
   if (useMocks) {
-    return MOCK_PROFESSOR_SUBMISSIONS.map((s, i) => ({
+    return DEFAULT_MOCK_SUBMISSIONS.map((s, i) => ({
       submissionId: i + 1,
       assignmentId: 1,
       assignmentTitle: s.assignment,
       courseId: 1,
-      courseName: s.course,
+      courseName: 'Cell Biology',
       studentId: i + 1,
       studentName: s.student,
       fileUrl: 'https://example.com/submission.pdf',

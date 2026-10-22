@@ -30,6 +30,14 @@ public class SubmissionDto {
         public void setFileUrl(String fileUrl) {
             this.fileUrl = fileUrl;
         }
+
+        public String getAttachmentUrl() {
+            return fileUrl;
+        }
+
+        public void setAttachmentUrl(String attachmentUrl) {
+            this.fileUrl = attachmentUrl;
+        }
     }
 
     public static class CreateSubmissionRequest {
@@ -109,6 +117,14 @@ public class SubmissionDto {
 
         public void setMarksObtained(Integer marksObtained) {
             this.marksObtained = marksObtained;
+        }
+
+        public Integer getMarks() {
+            return marksObtained;
+        }
+
+        public void setMarks(Integer marks) {
+            this.marksObtained = marks;
         }
 
         public String getFeedback() {
