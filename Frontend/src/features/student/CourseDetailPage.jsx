@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { MOCK_COURSE_DETAIL } from '../../mocks/mockData';
 import { ProgressBar } from '../../components/ui/ProgressRing';
@@ -9,12 +9,35 @@ import { OverviewTab } from './course-tabs/OverviewTab';
 import { ResourcesTab } from './course-tabs/ResourcesTab';
 import { AssignmentsTab } from './course-tabs/AssignmentsTab';
 import { QuizzesTab } from './course-tabs/QuizzesTab';
+import { getCourse } from '../../lib/api/coursesApi';
 
 export function CourseDetailPage() {
   const navigate = useNavigate();
   const { courseId } = useParams();
   const [activeTab, setActiveTab] = useState('Overview');
-  const course = MOCK_COURSE_DETAIL;
+  const [course, setCourse] = useState(MOCK_COURSE_DETAIL);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!courseId) return;
+    setIsLoading(true);
+    getCourse(courseId)
+      .then((data) => {
+        if (data) {
+          setCourse({
+            ...MOCK_COURSE_DETAIL,
+            ...data,
+            id: data.courseId,
+            title: data.courseName || data.title,
+            code: data.courseCode || data.code,
+            section: data.section || 'Section 01',
+            instructor: data.professorName || data.instructor || 'Professor',
+          });
+        }
+      })
+      .catch((err) => console.error('Failed to get course:', err))
+      .finally(() => setIsLoading(false));
+  }, [courseId]);
 
   const tabs = ['Overview', 'Modules', 'Assignments', 'Quizzes', 'People', 'Grades'];
 
@@ -107,7 +130,7 @@ export function CourseDetailPage() {
 
       {/* Tab Content */}
       {activeTab === 'Overview' && <OverviewTab course={course} setActiveTab={setActiveTab} />}
-      {activeTab === 'Modules' && <ResourcesTab course={course} />}
+      {activeTab === 'Modules' && <ResourcesTab course={course} courseId={courseId} />}
       {activeTab === 'Assignments' && <AssignmentsTab course={course} />}
       {activeTab === 'Quizzes' && <QuizzesTab course={course} />}
 

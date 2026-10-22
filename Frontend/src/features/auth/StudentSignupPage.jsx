@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '../../components/ui/Button';
 import { Input, PasswordInput } from '../../components/ui/Input';
 import { useAuthStore } from '../../store/authStore';
+import { joinCourse } from '../../lib/api/coursesApi';
 import { ShieldCheck, Check, ArrowRight } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 export function StudentSignupPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { register } = useAuthStore();
+  const isProfessor = location.pathname.includes('professor');
+  const roleName = isProfessor ? 'FACULTY' : 'STUDENT';
 
   const allowedDomain = import.meta.env.VITE_ALLOWED_EMAIL_DOMAIN;
   const defaultDomain = allowedDomain || 'geu.edu';
@@ -53,12 +57,26 @@ export function StudentSignupPage() {
     if (e) e.preventDefault();
     setFormError('');
     try {
-      await register({
+      const user = await register({
         name: `${formData.firstName} ${formData.lastName}`.trim(),
         email: formData.email,
         password: formData.password,
+        roleName,
       });
-      navigate('/student/home');
+
+      if (!isProfessor && formData.classCode && formData.classCode.trim()) {
+        try {
+          await joinCourse({ courseCode: formData.classCode.trim() });
+        } catch (joinErr) {
+          console.warn('Non-blocking class code join warning:', joinErr);
+        }
+      }
+
+      if (isProfessor || user?.role === 'FACULTY' || user?.role === 'PROFESSOR') {
+        navigate('/professor/overview');
+      } else {
+        navigate('/student/home');
+      }
     } catch (err) {
       setFormError(err.message || 'Unable to create your account.');
     }
@@ -101,13 +119,15 @@ export function StudentSignupPage() {
           <div className="lg:col-span-5 space-y-6">
             <div>
               <span className="text-[11px] font-bold uppercase tracking-widest text-brand-600 mb-2 block">
-                Student account
+                {isProfessor ? 'Professor account' : 'Student account'}
               </span>
               <h1 className="text-3xl font-extrabold text-ink tracking-tight mb-3">
-                Create your learning space.
+                {isProfessor ? 'Create your teaching space.' : 'Create your learning space.'}
               </h1>
               <p className="text-sm text-ink-muted leading-relaxed">
-                Join your Northbridge classes and keep every deadline, discussion, and result in view.
+                {isProfessor
+                  ? 'Manage your academic courses, assignments, quizzes, and student rosters.'
+                  : 'Join your classes and keep every deadline, discussion, and result in view.'}
               </p>
             </div>
 

@@ -37,7 +37,7 @@ export function LoginPage() {
       if (redirect) {
         navigate(redirect);
       } else {
-        navigate(user.role === 'PROFESSOR'
+        navigate((user.role === 'PROFESSOR' || user.role === 'FACULTY')
           ? '/professor/overview' : '/student/home');
       }
     } catch (err) {

@@ -1,25 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { BookOpen, Users } from 'lucide-react';
 import { StudentsTab } from './course-tabs/StudentsTab';
 import { ResourcesTab } from './course-tabs/ResourcesTab';
 import { AssignmentsTab } from './course-tabs/AssignmentsTab';
 import { QuizzesTab } from './course-tabs/QuizzesTab';
+import { getCourse } from '../../lib/api/coursesApi';
 
 export function ProfessorCourseDetailPage() {
   const { courseId } = useParams();
   const [activeTab, setActiveTab] = useState('Students');
+  const [course, setCourse] = useState({
+    id: courseId,
+    title: 'Loading...',
+    code: '...',
+    section: 'Section 01',
+    enrolledCount: 0,
+  });
+
+  useEffect(() => {
+    if (!courseId) return;
+    getCourse(courseId)
+      .then((data) => {
+        if (data) {
+          setCourse({
+            id: data.courseId,
+            courseId: data.courseId,
+            title: data.courseName,
+            courseName: data.courseName,
+            code: data.courseCode,
+            courseCode: data.courseCode,
+            section: data.section || 'Section 01',
+            enrolledCount: data.enrollmentCount ?? 0,
+            description: data.description,
+          });
+        }
+      })
+      .catch((err) => console.error('Failed to get professor course:', err));
+  }, [courseId]);
 
   const tabs = ['Students', 'Resources', 'Assignments', 'Quizzes'];
-
-  // Course mock fallback or details
-  const course = {
-    id: courseId,
-    title: 'Course Management',
-    code: 'CRS ' + (courseId || '101'),
-    section: 'Section 01',
-    enrolledCount: 42,
-  };
 
   return (
     <div className="space-y-6">

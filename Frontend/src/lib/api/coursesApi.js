@@ -1,7 +1,30 @@
 import { apiRequest } from '../http';
-import { MOCK_STUDENT_CLASSES, MOCK_PROFESSOR_COURSES, MOCK_COURSE_DETAIL } from '../../mocks/mockData';
+import { MOCK_COURSE_DETAIL } from '../../mocks/mockData';
 
 const useMocks = import.meta.env.VITE_USE_MOCKS === 'true';
+
+const MOCK_COURSES = [
+  {
+    courseId: 1,
+    courseName: 'Cell Biology',
+    courseCode: 'BIO214',
+    description: 'Comprehensive curriculum and lecture series on cell structures.',
+    section: 'Section 02',
+    professorId: 2,
+    professorName: 'Dr. Priya Sharma',
+    enrollmentCount: 48,
+  },
+  {
+    courseId: 2,
+    courseName: 'Interaction Design',
+    courseCode: 'DES202',
+    description: 'Studio course covering UI/UX principles and interactive prototyping.',
+    section: 'Section 01',
+    professorId: 2,
+    professorName: 'Prof. Aditya Verma',
+    enrollmentCount: 36,
+  },
+];
 
 export async function createCourse(data) {
   if (useMocks) {
@@ -24,16 +47,7 @@ export async function createCourse(data) {
 
 export async function listMyCourses() {
   if (useMocks) {
-    return MOCK_STUDENT_CLASSES.map((c, i) => ({
-      courseId: i + 1,
-      courseName: c.title,
-      courseCode: c.code.replace(/\s+/g, ''),
-      description: c.summary,
-      section: c.section,
-      professorId: 2,
-      professorName: c.instructor,
-      enrollmentCount: c.enrolledCount || 35,
-    }));
+    return MOCK_COURSES;
   }
   return apiRequest('/courses/my');
 }
