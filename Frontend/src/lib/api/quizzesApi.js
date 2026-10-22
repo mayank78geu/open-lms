@@ -1,5 +1,22 @@
 import { apiRequest } from '../http';
-import { MOCK_ACTIVE_QUIZ } from '../../mocks/mockData';
+
+const DEFAULT_MOCK_QUIZ = {
+  title: 'Quiz 2: Cell structure & microscopy',
+  timeLimitMinutes: 25,
+  totalQuestions: 10,
+  questions: [
+    {
+      id: 'q1',
+      text: 'Which organelle is responsible for generating most of the chemical energy needed to power the cell?',
+      options: [
+        { id: 'opt1', text: 'Mitochondria' },
+        { id: 'opt2', text: 'Golgi apparatus' },
+        { id: 'opt3', text: 'Ribosome' },
+        { id: 'opt4', text: 'Endoplasmic reticulum' },
+      ],
+    },
+  ],
+};
 
 const useMocks = import.meta.env.VITE_USE_MOCKS === 'true';
 
@@ -26,10 +43,10 @@ export async function listCourseQuizzes(courseId) {
       {
         quizId: 201,
         courseId: Number(courseId),
-        title: MOCK_ACTIVE_QUIZ.title,
-        timeLimit: MOCK_ACTIVE_QUIZ.timeLimitMinutes,
+        title: DEFAULT_MOCK_QUIZ.title,
+        timeLimit: DEFAULT_MOCK_QUIZ.timeLimitMinutes,
         maxMarks: 20,
-        questionCount: MOCK_ACTIVE_QUIZ.totalQuestions,
+        questionCount: DEFAULT_MOCK_QUIZ.totalQuestions,
         hasAttempted: false,
         score: null,
       },
@@ -43,10 +60,10 @@ export async function getQuiz(quizId) {
     return {
       quizId: Number(quizId),
       courseId: 1,
-      title: MOCK_ACTIVE_QUIZ.title,
-      timeLimit: MOCK_ACTIVE_QUIZ.timeLimitMinutes,
+      title: DEFAULT_MOCK_QUIZ.title,
+      timeLimit: DEFAULT_MOCK_QUIZ.timeLimitMinutes,
       maxMarks: 20,
-      questions: MOCK_ACTIVE_QUIZ.questions.map((q) => ({
+      questions: DEFAULT_MOCK_QUIZ.questions.map((q) => ({
         questionId: Number(q.id.replace(/\D/g, '')) || 1,
         questionText: q.text,
         marks: 2,
