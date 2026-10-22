@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ProgressRing } from '../../components/ui/ProgressRing';
 import { ProgressBar } from '../../components/ui/ProgressRing';
@@ -6,6 +6,7 @@ import { StatCard } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
+import { getStudentDashboard } from '../../lib/api/dashboardApi';
 import {
   MOCK_STUDENT_DASHBOARD,
 } from '../../mocks/mockData';
@@ -23,8 +24,59 @@ import { COURSE_ACCENTS } from '../../lib/utils';
 
 export function StudentDashboardPage() {
   const navigate = useNavigate();
-  const data = MOCK_STUDENT_DASHBOARD;
+  const mockFallback = MOCK_STUDENT_DASHBOARD;
+  const [dashboardData, setDashboardData] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [isPlanDrawerOpen, setIsPlanDrawerOpen] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    getStudentDashboard()
+      .then((data) => {
+        if (mounted) {
+          setDashboardData(data);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load student dashboard:', err);
+        if (mounted) setLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const stats = [
+    {
+      label: 'Enrolled courses',
+      value: dashboardData?.stats?.enrolledCourses ?? (loading ? '...' : 0),
+      subtext: 'Active classes',
+    },
+    {
+      label: 'Due this week',
+      value: dashboardData?.stats?.dueThisWeek ?? (loading ? '...' : 0),
+      subtext: 'Next 7 days',
+    },
+    {
+      label: 'Average grade',
+      value:
+        dashboardData?.stats?.averageGradePercent != null
+          ? `${dashboardData.stats.averageGradePercent}%`
+          : loading
+          ? '...'
+          : 'N/A',
+      subtext: 'Across graded work',
+    },
+    {
+      label: 'Pending assignments',
+      value: dashboardData?.stats?.pendingAssignments ?? (loading ? '...' : 0),
+      subtext: 'Awaiting submission',
+    },
+  ];
+
+  const courses = dashboardData?.courses || [];
+  const upcoming = dashboardData?.upcomingDeadlines || [];
 
   return (
     <div className="space-y-7">
@@ -38,23 +90,23 @@ export function StudentDashboardPage() {
           {/* Left Text */}
           <div className="max-w-xl space-y-2">
             <span className="text-[11px] font-bold uppercase tracking-widest text-violet-200">
-              {data.hero.eyebrow}
+              {mockFallback.hero.eyebrow}
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-              {data.hero.title}
+              {mockFallback.hero.title}
             </h2>
             <p className="text-sm text-violet-100 font-normal leading-relaxed pr-4">
-              {data.hero.body}
+              {mockFallback.hero.body}
             </p>
           </div>
 
           {/* Right Progress Ring & CTA */}
           <div className="flex items-center gap-6 shrink-0 self-stretch md:self-auto justify-between md:justify-end">
             <ProgressRing
-              value={data.hero.weekDonePercent}
+              value={dashboardData?.stats?.averageGradePercent ? Math.round(dashboardData.stats.averageGradePercent) : 80}
               size={100}
               strokeWidth={8}
-              label="WEEK DONE"
+              label="PROGRESS"
               trackColor="rgba(255, 255, 255, 0.2)"
               progressColor="#FFFFFF"
             />
@@ -72,14 +124,12 @@ export function StudentDashboardPage() {
 
       {/* 4 Stat Cards Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {data.stats.map((stat, idx) => (
+        {stats.map((stat, idx) => (
           <StatCard
             key={idx}
             label={stat.label}
             value={stat.value}
             subtext={stat.subtext}
-            trend={stat.trend}
-            trendPositive={stat.trendPositive}
           />
         ))}
       </div>
@@ -102,107 +152,142 @@ export function StudentDashboardPage() {
           </div>
 
           {/* Course Cards Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {data.continueLearning.map((course) => {
-              const accent = COURSE_ACCENTS[course.accent] || COURSE_ACCENTS.violet;
-              return (
-                <div
-                  key={course.id}
-                  onClick={() => navigate(`/student/classes/${course.id}`)}
-                  className="bg-white rounded-2xl border border-ink-border/80 p-5 shadow-soft hover:shadow-card hover:border-slate-300 transition-all duration-200 cursor-pointer flex flex-col justify-between group"
-                >
-                  <div>
-                    {/* Course Code Tile */}
-                    <div className="flex items-center justify-between mb-3">
-                      <div
-                        className={`px-2.5 py-1 rounded-lg text-xs font-bold ${accent.tile}`}
-                      >
-                        {course.code}
+          {courses.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-ink-border/80 p-8 text-center shadow-soft">
+              <BookOpen className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+              <p className="text-sm font-semibold text-ink">No courses enrolled yet</p>
+              <p className="text-xs text-ink-muted mt-1 mb-4">
+                Join a class using a code from your instructor to get started.
+              </p>
+              <Button
+                size="sm"
+                variant="primary"
+                onClick={() => navigate('/student/classes')}
+              >
+                Join a Class
+              </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {courses.map((course, idx) => {
+                const accentKeys = ['violet', 'blue', 'emerald', 'amber', 'rose'];
+                const accentKey = course.accent || accentKeys[idx % accentKeys.length];
+                const accent = COURSE_ACCENTS[accentKey] || COURSE_ACCENTS.violet;
+                const progress = course.progressPercent ?? 0;
+                return (
+                  <div
+                    key={course.courseId || course.id}
+                    onClick={() => navigate(`/student/classes/${course.courseId || course.id}`)}
+                    className="bg-white rounded-2xl border border-ink-border/80 p-5 shadow-soft hover:shadow-card hover:border-slate-300 transition-all duration-200 cursor-pointer flex flex-col justify-between group"
+                  >
+                    <div>
+                      {/* Course Code Tile */}
+                      <div className="flex items-center justify-between mb-3">
+                        <div
+                          className={`px-2.5 py-1 rounded-lg text-xs font-bold ${accent.tile}`}
+                        >
+                          {course.courseCode || course.code}
+                        </div>
+                        <span className="text-[11px] text-ink-muted group-hover:text-ink font-medium">
+                          {course.totalAssignments ? `${course.completedAssignments || 0}/${course.totalAssignments} done` : 'Active'}
+                        </span>
                       </div>
-                      <span className="text-[11px] text-ink-muted group-hover:text-ink font-medium">
-                        {course.schedule}
-                      </span>
+
+                      {/* Title & Instructor */}
+                      <h4 className="text-sm font-bold text-ink group-hover:text-brand-600 transition-colors line-clamp-1 mb-1">
+                        {course.courseName || course.title || course.name}
+                      </h4>
+                      <p className="text-xs text-ink-muted mb-6">
+                        {course.professorName || course.instructor || course.instructorName || 'Faculty'}
+                      </p>
                     </div>
 
-                    {/* Title & Instructor */}
-                    <h4 className="text-sm font-bold text-ink group-hover:text-brand-600 transition-colors line-clamp-1 mb-1">
-                      {course.title}
-                    </h4>
-                    <p className="text-xs text-ink-muted mb-6">
-                      {course.instructor}
-                    </p>
-                  </div>
-
-                  {/* Course Progress */}
-                  <div>
-                    <div className="flex items-center justify-between text-[11px] mb-1.5 font-bold">
-                      <span className="text-ink-muted uppercase tracking-wider text-[10px]">
-                        COURSE PROGRESS
-                      </span>
-                      <span className="text-ink font-bold">{course.progress}%</span>
+                    {/* Course Progress */}
+                    <div>
+                      <div className="flex items-center justify-between text-[11px] mb-1.5 font-bold">
+                        <span className="text-ink-muted uppercase tracking-wider text-[10px]">
+                          COURSE PROGRESS
+                        </span>
+                        <span className="text-ink font-bold">{progress}%</span>
+                      </div>
+                      <ProgressBar
+                        value={progress}
+                        color={accent.bar}
+                        height="h-1.5"
+                      />
                     </div>
-                    <ProgressBar
-                      value={course.progress}
-                      color={accent.bar}
-                      height="h-1.5"
-                    />
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Right Column (4 cols): Upcoming Tasks */}
         <div className="lg:col-span-4 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-bold text-ink tracking-tight">Upcoming</h3>
-            <Link
-              to="/student/calendar"
-              className="text-xs font-semibold text-brand-600 hover:text-brand-700 hover:underline flex items-center gap-1"
-            >
-              Calendar
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
+            <span className="text-xs font-medium text-ink-muted">
+              Next 14 days
+            </span>
           </div>
 
           <div className="bg-white rounded-2xl border border-ink-border/80 shadow-soft p-3 divide-y divide-slate-100">
-            {data.upcoming.map((item) => (
-              <div
-                key={item.id}
-                onClick={() => {
-                  if (item.quizId) {
-                    navigate(`/student/classes/${item.courseId}/quizzes/${item.quizId}`);
-                  } else {
-                    navigate(`/student/classes/${item.courseId}`);
-                  }
-                }}
-                className="py-3 px-2 flex items-center justify-between hover:bg-slate-50/80 rounded-xl transition-colors cursor-pointer group"
-              >
-                <div className="flex items-center gap-3">
-                  {/* Date chip */}
-                  <div className="w-12 h-10 rounded-xl bg-slate-100 flex flex-col items-center justify-center text-center font-bold text-[10px] text-ink shrink-0 group-hover:bg-brand-50 group-hover:text-brand-700 transition-colors">
-                    {item.dateChip}
-                  </div>
-                  <div>
-                    <h5 className="text-xs font-bold text-ink group-hover:text-brand-600 transition-colors line-clamp-1">
-                      {item.title}
-                    </h5>
-                    <p className="text-[11px] text-ink-muted leading-tight mt-0.5">
-                      {item.timeLabel}
-                    </p>
-                  </div>
-                </div>
-
-                <Badge
-                  variant={item.type.toLowerCase()}
-                  size="xs"
-                  className="font-medium shrink-0 ml-2"
-                >
-                  {item.type}
-                </Badge>
+            {upcoming.length === 0 ? (
+              <div className="py-8 px-4 text-center">
+                <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto mb-2" />
+                <p className="text-xs font-semibold text-ink">All caught up!</p>
+                <p className="text-[11px] text-ink-muted mt-0.5">
+                  No deadlines due in the next 14 days.
+                </p>
               </div>
-            ))}
+            ) : (
+              upcoming.map((item) => {
+                const dueDate = item.dueAt ? new Date(item.dueAt) : null;
+                const month = dueDate ? dueDate.toLocaleString('default', { month: 'short' }).toUpperCase() : 'DUE';
+                const day = dueDate ? dueDate.getDate() : '';
+                const timeString = dueDate ? dueDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+                const isQuiz = item.type === 'quiz';
+
+                return (
+                  <div
+                    key={`${item.type}-${item.id}`}
+                    onClick={() => {
+                      if (isQuiz) {
+                        navigate(`/student/classes/${item.courseId}/quizzes/${item.id}`);
+                      } else {
+                        navigate(`/student/classes/${item.courseId}`);
+                      }
+                    }}
+                    className="py-3 px-2 flex items-center justify-between hover:bg-slate-50/80 rounded-xl transition-colors cursor-pointer group"
+                  >
+                    <div className="flex items-center gap-3">
+                      {/* Date chip */}
+                      <div className="w-12 h-10 rounded-xl bg-slate-100 flex flex-col items-center justify-center text-center font-bold text-[10px] text-ink shrink-0 group-hover:bg-brand-50 group-hover:text-brand-700 transition-colors">
+                        <span className="text-[9px] uppercase leading-none text-ink-muted">{month}</span>
+                        <span className="text-xs font-extrabold leading-none mt-0.5">{day}</span>
+                      </div>
+                      <div>
+                        <h5 className="text-xs font-bold text-ink group-hover:text-brand-600 transition-colors line-clamp-1">
+                          {item.title}
+                        </h5>
+                        <p className="text-[11px] text-ink-muted leading-tight mt-0.5">
+                          {timeString ? `${timeString} • ` : ''}{item.courseName}
+                        </p>
+                      </div>
+                    </div>
+
+                    <Badge
+                      variant={isQuiz ? 'quiz' : 'assignment'}
+                      size="xs"
+                      className="font-medium shrink-0 ml-2"
+                    >
+                      {item.type}
+                    </Badge>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
       </div>
