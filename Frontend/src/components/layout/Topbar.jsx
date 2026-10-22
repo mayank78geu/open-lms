@@ -29,10 +29,14 @@ export function Topbar({ title, subtitle }) {
     }
   };
 
-  const handleRoleToggle = () => {
+  const handleRoleToggle = async () => {
     const nextRole = role === 'PROFESSOR' ? 'STUDENT' : 'PROFESSOR';
-    switchRole(nextRole);
-    navigate(nextRole === 'PROFESSOR' ? '/professor/overview' : '/student/home');
+    try {
+      await switchRole(nextRole);
+      navigate(nextRole === 'PROFESSOR' ? '/professor/overview' : '/student/home');
+    } catch (err) {
+      console.error('Role toggle failed:', err);
+    }
   };
 
   return (
@@ -54,8 +58,8 @@ export function Topbar({ title, subtitle }) {
               </h1>
               <p className="text-[11px] text-ink-muted">
                 {role === 'PROFESSOR'
-                  ? 'Thursday, October 1 · Fall term'
-                  : 'Thursday, October 1 · Week 6'}
+                  ? 'Faculty Academic Workspace · Active Semester'
+                  : 'Student Learning Portal · Current Semester'}
               </p>
             </div>
           )}
@@ -114,7 +118,7 @@ export function Topbar({ title, subtitle }) {
                   <button
                     onClick={() => {
                       setIsCreateDropdownOpen(false);
-                      alert('Create new course modal opened');
+                      navigate('/professor/courses?action=new');
                     }}
                     className="w-full text-left px-4 py-2 hover:bg-slate-50 font-medium text-ink"
                   >
@@ -123,7 +127,7 @@ export function Topbar({ title, subtitle }) {
                   <button
                     onClick={() => {
                       setIsCreateDropdownOpen(false);
-                      alert('Create assignment modal opened');
+                      navigate('/professor/courses');
                     }}
                     className="w-full text-left px-4 py-2 hover:bg-slate-50 font-medium text-ink"
                   >
@@ -132,7 +136,7 @@ export function Topbar({ title, subtitle }) {
                   <button
                     onClick={() => {
                       setIsCreateDropdownOpen(false);
-                      alert('Create quiz modal opened');
+                      navigate('/professor/courses');
                     }}
                     className="w-full text-left px-4 py-2 hover:bg-slate-50 font-medium text-ink"
                   >
@@ -142,7 +146,7 @@ export function Topbar({ title, subtitle }) {
                   <button
                     onClick={() => {
                       setIsCreateDropdownOpen(false);
-                      alert('Post class announcement');
+                      alert('Work in Progress: Real-time broadcast announcements are currently in development.');
                     }}
                     className="w-full text-left px-4 py-2 hover:bg-slate-50 font-medium text-brand-600"
                   >
@@ -180,14 +184,17 @@ export function Topbar({ title, subtitle }) {
                     Mark all read
                   </span>
                 </div>
+                <div className="text-[10px] text-amber-800 bg-amber-50 p-2 rounded-lg border border-amber-200/80 mb-2 leading-relaxed">
+                  <span className="font-semibold">Work in Progress:</span> Real-time notifications service is under development. Demonstrative previews shown.
+                </div>
                 <div className="space-y-2">
                   <div className="p-2 rounded-lg bg-brand-50/60 text-ink">
-                    <p className="font-semibold text-xs">BIO 214 Quiz 2 is starting soon</p>
-                    <p className="text-[10px] text-ink-muted mt-0.5">Scheduled for today at 10:30 AM</p>
+                    <p className="font-semibold text-xs">CS 301 Assignment 1 graded</p>
+                    <p className="text-[10px] text-ink-muted mt-0.5">Score: 92/100 · Feedback available</p>
                   </div>
                   <div className="p-2 rounded-lg hover:bg-slate-50 text-ink transition-colors">
-                    <p className="font-semibold text-xs">Dr. Elena Park updated Cell Biology</p>
-                    <p className="text-[10px] text-ink-muted mt-0.5">Slides for Lecture 9 are ready</p>
+                    <p className="font-semibold text-xs">Prof. Priya Sharma updated Data Structures</p>
+                    <p className="text-[10px] text-ink-muted mt-0.5">Course syllabus PDF uploaded</p>
                   </div>
                 </div>
               </div>

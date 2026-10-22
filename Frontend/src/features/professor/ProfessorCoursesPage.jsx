@@ -45,6 +45,10 @@ export function ProfessorCoursesPage() {
 
   useEffect(() => {
     fetchCourses();
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('action') === 'new') {
+      setIsCreateModalOpen(true);
+    }
   }, []);
 
   const handleCreateCourse = async (e) => {

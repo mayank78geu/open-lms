@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Avatar } from '../../components/ui/Avatar';
 import { Button } from '../../components/ui/Button';
-import { Send, Search } from 'lucide-react';
+import { Send, Search, AlertCircle } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 
 export function MessagesPage() {
@@ -12,31 +12,31 @@ export function MessagesPage() {
   const [threads, setThreads] = useState([
     {
       id: 't1',
-      participant: role === 'STUDENT' ? 'Dr. Priya Sharma' : 'Rahul Sharma',
+      participant: role === 'STUDENT' ? 'Prof. Priya Sharma' : 'Rahul Sharma',
       initials: role === 'STUDENT' ? 'PS' : 'RS',
-      roleText: role === 'STUDENT' ? 'Professor · Cell Biology' : 'Student · BIO 214',
-      lastMessage: 'Let me know if you need any clarification on the dialysis tubing lab.',
+      roleText: role === 'STUDENT' ? 'Professor · Data Structures' : 'Student · CS 301',
+      lastMessage: 'Office hours are open if you need help with AVL trees.',
       time: '10 min ago',
       unread: false,
       messages: [
         {
           id: 'm1',
-          sender: role === 'STUDENT' ? 'Dr. Priya Sharma' : 'Dr. Priya Sharma',
-          text: 'Hello Rahul, I noticed you started the prep work for Module 2.',
+          sender: 'Prof. Priya Sharma',
+          text: 'Hello Rahul, please make sure your Assignment 1 AVL tree submission passes all unit tests.',
           time: '9:30 AM',
           isMe: role === 'PROFESSOR',
         },
         {
           id: 'm2',
           sender: 'Rahul Sharma',
-          text: 'Yes Dr. Sharma! I had a quick question regarding the solute concentration gradient on slide 14.',
+          text: 'Yes Professor! Double rotations and benchmarks are verified in the submission report.',
           time: '9:42 AM',
           isMe: role === 'STUDENT',
         },
         {
           id: 'm3',
-          sender: 'Dr. Priya Sharma',
-          text: 'Let me know if you need any clarification on the dialysis tubing lab during office hours!',
+          sender: 'Prof. Priya Sharma',
+          text: 'Excellent work. Office hours are open if you need help with AVL trees or Dijkstra.',
           time: '10:05 AM',
           isMe: role === 'PROFESSOR',
         },
@@ -44,17 +44,17 @@ export function MessagesPage() {
     },
     {
       id: 't2',
-      participant: 'Prof. Amir Solis',
-      initials: 'AS',
-      roleText: 'Professor · Interaction Design',
-      lastMessage: 'Looking forward to the design sprint critique tomorrow.',
+      participant: 'Neha Patel',
+      initials: 'NP',
+      roleText: 'Student · CS 301',
+      lastMessage: 'Submitted the graph traversal questions.',
       time: '1 hr ago',
       unread: true,
       messages: [
         {
           id: 'm20',
-          sender: 'Prof. Amir Solis',
-          text: 'Looking forward to the design sprint critique tomorrow.',
+          sender: 'Neha Patel',
+          text: 'Submitted the graph traversal questions.',
           time: 'Yesterday',
           isMe: false,
         },
@@ -97,6 +97,19 @@ export function MessagesPage() {
         <p className="text-xs text-ink-muted mt-0.5">
           Direct communication between students, faculty, and teaching assistants.
         </p>
+      </div>
+
+      {/* Work In Progress Notice */}
+      <div className="bg-amber-50 border border-amber-200/90 rounded-2xl p-4 flex items-start gap-3 text-amber-900 shadow-soft">
+        <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+        <div className="space-y-1">
+          <h4 className="text-xs font-bold text-amber-950 uppercase tracking-wide">
+            Work in Progress · Preview Mode
+          </h4>
+          <p className="text-xs text-amber-800 leading-relaxed">
+            The real-time direct messaging backend service is currently in development. The conversation threads, replies, and sample messages shown below contain demonstrative dummy data for user interface testing and verification.
+          </p>
+        </div>
       </div>
 
       <div className="bg-white rounded-2xl border border-ink-border shadow-soft h-[600px] grid grid-cols-1 md:grid-cols-12 overflow-hidden">

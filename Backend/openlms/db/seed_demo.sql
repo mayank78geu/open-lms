@@ -141,3 +141,39 @@ WHERE NOT EXISTS (SELECT 1 FROM quiz_answers WHERE attempt_id = @attempt_id AND 
 INSERT INTO quiz_answers (attempt_id, question_id, selected_option_id)
 SELECT @attempt_id, @q2_id, @q2_opt2
 WHERE NOT EXISTS (SELECT 1 FROM quiz_answers WHERE attempt_id = @attempt_id AND question_id = @q2_id);
+
+-- =====================================================================
+-- 10. Seed Additional Courses: BIO-214 & DES-202
+-- =====================================================
+INSERT INTO courses (course_code, course_name, description, section, professor_id)
+SELECT 'BIO-214', 'Cell & Molecular Biology', 'Comprehensive curriculum covering cell structure, enzymatic reactions, DNA replication, and microscopy labs.', 'Section 02', @prof_id
+WHERE NOT EXISTS (SELECT 1 FROM courses WHERE course_code = 'BIO-214');
+
+SET @bio_course_id = (SELECT course_id FROM courses WHERE course_code = 'BIO-214' LIMIT 1);
+
+INSERT INTO enrollments (course_id, student_id)
+SELECT @bio_course_id, @student1_id
+WHERE NOT EXISTS (SELECT 1 FROM enrollments WHERE course_id = @bio_course_id AND student_id = @student1_id);
+
+INSERT INTO enrollments (course_id, student_id)
+SELECT @bio_course_id, @student2_id
+WHERE NOT EXISTS (SELECT 1 FROM enrollments WHERE course_id = @bio_course_id AND student_id = @student2_id);
+
+INSERT INTO assignments (course_id, title, description, max_marks, due_date, created_by)
+SELECT @bio_course_id, 'Lab Reflection 03: Membrane Permeability', 'Analyze dialysis tubing observations and document solute concentration gradients across selective membranes.', 50, DATE_ADD(NOW(), INTERVAL 5 DAY), @prof_id
+WHERE NOT EXISTS (SELECT 1 FROM assignments WHERE course_id = @bio_course_id AND title = 'Lab Reflection 03: Membrane Permeability');
+
+INSERT INTO courses (course_code, course_name, description, section, professor_id)
+SELECT 'DES-202', 'User Experience & Interface Design', 'Studio course emphasizing user research, wireframing, heuristic evaluation, and interactive design sprints.', 'Section 01', @prof_id
+WHERE NOT EXISTS (SELECT 1 FROM courses WHERE course_code = 'DES-202');
+
+SET @des_course_id = (SELECT course_id FROM courses WHERE course_code = 'DES-202' LIMIT 1);
+
+INSERT INTO enrollments (course_id, student_id)
+SELECT @des_course_id, @student1_id
+WHERE NOT EXISTS (SELECT 1 FROM enrollments WHERE course_id = @des_course_id AND student_id = @student1_id);
+
+INSERT INTO assignments (course_id, title, description, max_marks, due_date, created_by)
+SELECT @des_course_id, 'Design Sprint 1: Mobile Wireframes & Heuristics', 'Submit lo-fi wireframe sketches and accessibility audit for the e-commerce redesign project.', 100, DATE_ADD(NOW(), INTERVAL 9 DAY), @prof_id
+WHERE NOT EXISTS (SELECT 1 FROM assignments WHERE course_id = @des_course_id AND title = 'Design Sprint 1: Mobile Wireframes & Heuristics');
+

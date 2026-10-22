@@ -9,6 +9,7 @@ import { getProfessorDashboard } from '../../lib/api/dashboardApi';
 import {
   MOCK_PROFESSOR_DASHBOARD,
 } from '../../mocks/mockData';
+import { useAuthStore } from '../../store/authStore';
 import {
   Clock,
   ArrowRight,
@@ -24,6 +25,7 @@ import { COURSE_ACCENTS } from '../../lib/utils';
 
 export function ProfessorDashboardPage() {
   const navigate = useNavigate();
+  const user = useAuthStore((s) => s.user);
   const mockFallback = MOCK_PROFESSOR_DASHBOARD;
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -80,13 +82,13 @@ export function ProfessorDashboardPage() {
           {/* Left Text */}
           <div className="max-w-xl space-y-2">
             <span className="text-[11px] font-bold uppercase tracking-widest text-violet-200">
-              {mockFallback.hero.eyebrow}
+              FACULTY PORTAL
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-              {mockFallback.hero.title}
+              Good morning, {user?.name || 'Professor'} 👋
             </h2>
             <p className="text-sm text-violet-100 font-normal leading-relaxed pr-4">
-              {mockFallback.hero.body}
+              You have {dashboardData?.stats?.pendingGrading ?? 0} submission{(dashboardData?.stats?.pendingGrading === 1) ? '' : 's'} awaiting grading and {dashboardData?.stats?.quizzesActive ?? 0} active quiz{(dashboardData?.stats?.quizzesActive === 1) ? '' : 'zes'} across {dashboardData?.stats?.activeCourses ?? courses.length} teaching courses.
             </p>
           </div>
 

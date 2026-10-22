@@ -61,9 +61,12 @@ export const useAuthStore = create((set, get) => ({
     return user;
   },
 
-  switchRole: (newRole) => {
+  switchRole: async (newRole) => {
     if (!useMocks) {
-      return;
+      const email = (newRole === 'PROFESSOR' || newRole === 'FACULTY')
+        ? 'priya.sharma@geu.edu'
+        : 'rahul.sharma@geu.edu';
+      return await get().login(email, 'password123', newRole);
     }
     const newUser = (newRole === 'PROFESSOR' || newRole === 'FACULTY') ? MOCK_USERS.professor : MOCK_USERS.student;
     authStorage.setUser(newUser);

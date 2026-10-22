@@ -9,13 +9,14 @@ import { OverviewTab } from './course-tabs/OverviewTab';
 import { ResourcesTab } from './course-tabs/ResourcesTab';
 import { AssignmentsTab } from './course-tabs/AssignmentsTab';
 import { QuizzesTab } from './course-tabs/QuizzesTab';
+import { GradesTab } from './course-tabs/GradesTab';
 import { getCourse } from '../../lib/api/coursesApi';
 
 export function CourseDetailPage() {
   const navigate = useNavigate();
   const { courseId } = useParams();
   const [activeTab, setActiveTab] = useState('Overview');
-  const [course, setCourse] = useState(MOCK_COURSE_DETAIL);
+  const [course, setCourse] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -25,13 +26,18 @@ export function CourseDetailPage() {
       .then((data) => {
         if (data) {
           setCourse({
-            ...MOCK_COURSE_DETAIL,
-            ...data,
             id: data.courseId,
-            title: data.courseName || data.title,
-            code: data.courseCode || data.code,
+            courseId: data.courseId,
+            title: data.courseName,
+            courseName: data.courseName,
+            code: data.courseCode,
+            courseCode: data.courseCode,
             section: data.section || 'Section 01',
-            instructor: data.professorName || data.instructor || 'Professor',
+            instructor: data.professorName || 'Professor',
+            professorName: data.professorName || 'Professor',
+            description: data.description || 'Welcome to this course curriculum.',
+            enrollmentCount: data.enrollmentCount ?? 0,
+            progress: 0,
           });
         }
       })
@@ -39,7 +45,17 @@ export function CourseDetailPage() {
       .finally(() => setIsLoading(false));
   }, [courseId]);
 
-  const tabs = ['Overview', 'Modules', 'Assignments', 'Quizzes', 'People', 'Grades'];
+  if (isLoading || !course) {
+    return (
+      <div className="bg-white rounded-2xl border border-ink-border p-12 text-center shadow-soft">
+        <BookOpen className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+        <p className="text-sm font-semibold text-ink">Loading class details...</p>
+        <p className="text-xs text-ink-muted mt-1">Retrieving course syllabus, assignments, and grades.</p>
+      </div>
+    );
+  }
+
+  const tabs = ['Overview', 'Resources', 'Assignments', 'Quizzes', 'Grades'];
 
   return (
     <div className="space-y-6">
@@ -58,7 +74,7 @@ export function CourseDetailPage() {
               {course.title}
             </h1>
             <span className="text-xs font-semibold text-ink-muted">
-              {course.code} · {course.term}
+              {course.code} · {course.term || 'Fall Term 2026'}
             </span>
           </div>
         </div>
@@ -86,7 +102,7 @@ export function CourseDetailPage() {
               {course.code} · {course.section}
             </div>
             <h2 className="text-2xl font-bold text-white mb-1.5">{course.title}</h2>
-            <p className="text-xs text-slate-300 font-normal">{course.schedule}</p>
+            <p className="text-xs text-slate-300 font-normal">{course.description || 'Active class curriculum.'}</p>
           </div>
         </div>
 
@@ -130,75 +146,10 @@ export function CourseDetailPage() {
 
       {/* Tab Content */}
       {activeTab === 'Overview' && <OverviewTab course={course} setActiveTab={setActiveTab} />}
-      {activeTab === 'Modules' && <ResourcesTab course={course} courseId={courseId} />}
+      {activeTab === 'Resources' && <ResourcesTab course={course} courseId={courseId} />}
       {activeTab === 'Assignments' && <AssignmentsTab course={course} />}
       {activeTab === 'Quizzes' && <QuizzesTab course={course} />}
-
-      {/* People tab */}
-      {activeTab === 'People' && (
-        <div className="bg-white rounded-2xl border border-ink-border p-6 shadow-soft space-y-3">
-          <h3 className="text-base font-bold text-ink">Classmates & Faculty (48 Enrolled)</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 pt-2">
-            <div className="p-3 rounded-xl border border-slate-200 flex items-center gap-3">
-              <Avatar initials="PS" color="violet" size="sm" />
-              <div>
-                <p className="text-xs font-bold text-ink">Dr. Priya Sharma</p>
-                <p className="text-[10px] text-ink-muted">Instructor</p>
-              </div>
-            </div>
-            <div className="p-3 rounded-xl border border-slate-200 flex items-center gap-3">
-              <Avatar initials="RS" color="brand" size="sm" />
-              <div>
-                <p className="text-xs font-bold text-ink">Rahul Sharma</p>
-                <p className="text-[10px] text-ink-muted">Student</p>
-              </div>
-            </div>
-            <div className="p-3 rounded-xl border border-slate-200 flex items-center gap-3">
-              <Avatar initials="AV" color="blue" size="sm" />
-              <div>
-                <p className="text-xs font-bold text-ink">Arjun Verma</p>
-                <p className="text-[10px] text-ink-muted">Student</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Grades tab */}
-      {activeTab === 'Grades' && (
-        <div className="bg-white rounded-2xl border border-ink-border p-6 shadow-soft space-y-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h3 className="text-base font-bold text-ink">Grades & Weightings</h3>
-              <p className="text-xs text-ink-muted">Total course grade: 92% (A)</p>
-            </div>
-          </div>
-          <table className="w-full text-xs text-left">
-            <thead className="border-b border-ink-border text-ink-muted uppercase">
-              <tr>
-                <th className="py-2">Item</th>
-                <th className="py-2">Due</th>
-                <th className="py-2">Score</th>
-                <th className="py-2">Weight</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              <tr>
-                <td className="py-3 font-semibold text-ink">Quiz 1: Organelles</td>
-                <td className="py-3 text-ink-muted">Sep 15</td>
-                <td className="py-3 font-bold text-emerald-600">19 / 20</td>
-                <td className="py-3 text-ink-muted">10%</td>
-              </tr>
-              <tr>
-                <td className="py-3 font-semibold text-ink">Lab reflection 02</td>
-                <td className="py-3 text-ink-muted">Sep 22</td>
-                <td className="py-3 font-bold text-emerald-600">18.5 / 20</td>
-                <td className="py-3 text-ink-muted">15%</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      )}
+      {activeTab === 'Grades' && <GradesTab courseId={courseId} course={course} />}
     </div>
   );
 }

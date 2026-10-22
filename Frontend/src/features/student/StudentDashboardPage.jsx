@@ -10,6 +10,7 @@ import { getStudentDashboard } from '../../lib/api/dashboardApi';
 import {
   MOCK_STUDENT_DASHBOARD,
 } from '../../mocks/mockData';
+import { useAuthStore } from '../../store/authStore';
 import {
   BookOpen,
   Calendar,
@@ -24,6 +25,7 @@ import { COURSE_ACCENTS } from '../../lib/utils';
 
 export function StudentDashboardPage() {
   const navigate = useNavigate();
+  const user = useAuthStore((s) => s.user);
   const mockFallback = MOCK_STUDENT_DASHBOARD;
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -90,13 +92,13 @@ export function StudentDashboardPage() {
           {/* Left Text */}
           <div className="max-w-xl space-y-2">
             <span className="text-[11px] font-bold uppercase tracking-widest text-violet-200">
-              {mockFallback.hero.eyebrow}
+              ACADEMIC DASHBOARD
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-              {mockFallback.hero.title}
+              Welcome back, {user?.name || 'Student'} 👋
             </h2>
             <p className="text-sm text-violet-100 font-normal leading-relaxed pr-4">
-              {mockFallback.hero.body}
+              You have {dashboardData?.stats?.pendingAssignments ?? 0} pending assignment{(dashboardData?.stats?.pendingAssignments === 1) ? '' : 's'} and {dashboardData?.stats?.dueThisWeek ?? 0} item{(dashboardData?.stats?.dueThisWeek === 1) ? '' : 's'} due this week across {dashboardData?.stats?.enrolledCourses ?? courses.length} enrolled courses.
             </p>
           </div>
 
@@ -243,18 +245,19 @@ export function StudentDashboardPage() {
               </div>
             ) : (
               upcoming.map((item) => {
-                const dueDate = item.dueAt ? new Date(item.dueAt) : null;
+                const dueDate = (item.dueDate || item.dueAt) ? new Date(item.dueDate || item.dueAt) : null;
                 const month = dueDate ? dueDate.toLocaleString('default', { month: 'short' }).toUpperCase() : 'DUE';
                 const day = dueDate ? dueDate.getDate() : '';
                 const timeString = dueDate ? dueDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
                 const isQuiz = item.type === 'quiz';
+                const taskId = item.assignmentId || item.id;
 
                 return (
                   <div
-                    key={`${item.type}-${item.id}`}
+                    key={`${item.type || 'task'}-${taskId}`}
                     onClick={() => {
                       if (isQuiz) {
-                        navigate(`/student/classes/${item.courseId}/quizzes/${item.id}`);
+                        navigate(`/student/classes/${item.courseId}/quizzes/${taskId}`);
                       } else {
                         navigate(`/student/classes/${item.courseId}`);
                       }
@@ -297,9 +300,15 @@ export function StudentDashboardPage() {
         isOpen={isPlanDrawerOpen}
         onClose={() => setIsPlanDrawerOpen(false)}
         title="Weekly Learning Plan"
-        description="Priority breakdown for Week 6 based on active course syllabi and upcoming deadlines."
+        description="Priority breakdown for the current semester based on active course syllabi and deadlines."
       >
         <div className="space-y-3 pt-2">
+          <div className="bg-amber-50 border border-amber-200/90 rounded-xl p-3 flex items-start gap-2.5 text-amber-900 mb-2">
+            <Sparkles className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+            <p className="text-xs leading-relaxed">
+              <strong className="font-semibold text-amber-950">Work in Progress:</strong> AI-powered dynamic weekly study pacing is currently in development. Demonstrative study plan schedule is shown below.
+            </p>
+          </div>
           <div className="p-3 rounded-xl bg-violet-50 border border-violet-100 flex items-start gap-3">
             <span className="w-6 h-6 rounded-full bg-violet-600 text-white flex items-center justify-center text-xs font-bold shrink-0">
               1
