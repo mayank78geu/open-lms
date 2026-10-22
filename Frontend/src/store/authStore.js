@@ -47,6 +47,29 @@ export const useAuthStore = create((set, get) => ({
     return userToSet;
   },
 
+  loginWithClerk: async ({ token, user }, remember = true) => {
+    const pendingRole = typeof window !== 'undefined'
+      ? window.sessionStorage.getItem('openlms_pending_role')
+      : null;
+    const role = pendingRole || user.publicMetadata?.role || user.unsafeMetadata?.role || 'STUDENT';
+    if (typeof window !== 'undefined') {
+      window.sessionStorage.removeItem('openlms_pending_role');
+    }
+    const normalizedRole = role === 'PROFESSOR' ? 'FACULTY' : role;
+    const currentUser = {
+      id: user.id,
+      name: [user.firstName, user.lastName].filter(Boolean).join(' ') || user.username || 'Open LMS User',
+      email: user.primaryEmailAddress?.emailAddress || '',
+      role: normalizedRole,
+      clerkUserId: user.id,
+    };
+
+    authStorage.setToken(token, remember);
+    authStorage.setUser(currentUser, remember);
+    set({ user: currentUser, isAuthenticated: true, role: normalizedRole });
+    return currentUser;
+  },
+
   register: async ({ name, email, password, roleName = 'STUDENT' }, remember = true) => {
     if (useMocks) {
       return get().login(email, password, (roleName === 'FACULTY' || roleName === 'PROFESSOR') ? 'PROFESSOR' : 'STUDENT', remember);

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useAuth, useSignIn } from '@clerk/clerk-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '../../components/ui/Button';
 import { Input, PasswordInput } from '../../components/ui/Input';
@@ -8,6 +9,8 @@ import { ShieldCheck, Check, ArrowRight } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 export function StudentSignupPage() {
+  const { signIn, isLoaded: isClerkLoaded } = useSignIn();
+  const { isSignedIn } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { register } = useAuthStore();
@@ -33,6 +36,31 @@ export function StudentSignupPage() {
 
   const [passwordStrength, setPasswordStrength] = useState('');
   const [formError, setFormError] = useState('');
+
+  const handleGoogleSignup = async () => {
+    setFormError('');
+    if (!isClerkLoaded) {
+      setFormError('Sign-up is still loading. Please try again.');
+      return;
+    }
+
+    try {
+      const origin = window.location.origin;
+      if (isSignedIn) {
+        navigate('/sso-complete', { replace: true });
+        return;
+      }
+
+      window.sessionStorage.setItem('openlms_pending_role', roleName);
+      await signIn.authenticateWithRedirect({
+        strategy: 'oauth_google',
+        redirectUrl: `${origin}/sso-callback`,
+        redirectUrlComplete: `${origin}/sso-complete`,
+      });
+    } catch (err) {
+      setFormError(err.errors?.[0]?.longMessage || err.message || 'Unable to sign up with Google.');
+    }
+  };
 
   const handleStep1Submit = (e) => {
     e.preventDefault();
@@ -335,7 +363,7 @@ export function StudentSignupPage() {
                   {/* Google */}
                   <button
                     type="button"
-                    onClick={() => setCurrentStep(2)}
+                    onClick={handleGoogleSignup}
                     className="w-full py-2.5 px-4 rounded-xl border border-ink-border hover:bg-slate-50 text-ink text-xs font-semibold flex items-center justify-center gap-2.5 transition-colors"
                   >
                     <svg className="w-4 h-4" viewBox="0 0 24 24">

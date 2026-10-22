@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useAuth, useSignIn } from '@clerk/clerk-react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '../../components/ui/Button';
 import { Input, PasswordInput } from '../../components/ui/Input';
@@ -6,6 +7,8 @@ import { useAuthStore } from '../../store/authStore';
 import { Check, ShieldCheck, Sparkles } from 'lucide-react';
 
 export function LoginPage() {
+  const { signIn, isLoaded: isClerkLoaded } = useSignIn();
+  const { isSignedIn } = useAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { login } = useAuthStore();
@@ -17,6 +20,30 @@ export function LoginPage() {
   const [keepSignedIn, setKeepSignedIn] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const handleGoogleSignIn = async () => {
+    setError('');
+    if (!isClerkLoaded) {
+      setError('Sign-in is still loading. Please try again.');
+      return;
+    }
+
+    if (isSignedIn || signIn.status === 'complete') {
+      navigate('/sso-complete', { replace: true });
+      return;
+    }
+
+    try {
+      const origin = window.location.origin;
+      await signIn.authenticateWithRedirect({
+        strategy: 'oauth_google',
+        redirectUrl: `${origin}/sso-callback`,
+        redirectUrlComplete: `${origin}/sso-complete`,
+      });
+    } catch (err) {
+      setError(err.errors?.[0]?.longMessage || err.message || 'Unable to sign in with Google.');
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -169,9 +196,7 @@ export function LoginPage() {
           {/* Google SSO Button */}
           <button
             type="button"
-            onClick={() => {
-              setError('Google sign-in is not configured. Please use your registered email and password.');
-            }}
+            onClick={handleGoogleSignIn}
             className="w-full py-2.5 px-4 rounded-xl border border-ink-border hover:bg-slate-50 text-ink text-sm font-semibold flex items-center justify-center gap-3 transition-colors shadow-2xs"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24">

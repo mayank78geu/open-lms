@@ -1,8 +1,6 @@
--- =====================================================================
 -- Open LMS Demo Seed Script
 -- Safe and idempotent: can be run on empty or existing database
 -- Default password for all seed accounts: password123
--- =====================================================================
 
 -- 1. Ensure Roles
 INSERT IGNORE INTO roles (role_id, role_name) VALUES 
@@ -142,9 +140,7 @@ INSERT INTO quiz_answers (attempt_id, question_id, selected_option_id)
 SELECT @attempt_id, @q2_id, @q2_opt2
 WHERE NOT EXISTS (SELECT 1 FROM quiz_answers WHERE attempt_id = @attempt_id AND question_id = @q2_id);
 
--- =====================================================================
--- 10. Seed Additional Courses: BIO-214 & DES-202
--- =====================================================
+
 INSERT INTO courses (course_code, course_name, description, section, professor_id)
 SELECT 'BIO-214', 'Cell & Molecular Biology', 'Comprehensive curriculum covering cell structure, enzymatic reactions, DNA replication, and microscopy labs.', 'Section 02', @prof_id
 WHERE NOT EXISTS (SELECT 1 FROM courses WHERE course_code = 'BIO-214');

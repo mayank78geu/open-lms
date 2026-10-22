@@ -21,7 +21,6 @@ public class AssignmentController {
         this.assignmentService = assignmentService;
     }
 
-    // AS1 — POST /courses/{courseId}/assignments (owner) -> 201
     @PostMapping("/api/v1/courses/{courseId}/assignments")
     @PreAuthorize("hasRole('FACULTY')")
     public ResponseEntity<AssignmentDto.AssignmentResponse> createAssignment(
