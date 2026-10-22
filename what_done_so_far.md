@@ -1,9 +1,8 @@
-
 # Open LMS — What's Done So Far
 
-> **Last updated:** October 22, 2026
-> **Repo:** [mayank78geu/open-lms](https://github.com/mayank78geu/open-lms)
-> **Latest commit:** `2e32de8` — *feat: Add Quiz and Submission functionality (Merged PR #9)*
+> **Last updated:** October 22, 2026  
+> **Repo:** [mayank78geu/open-lms](https://github.com/mayank78geu/open-lms)  
+> **Status:** Full-Stack LMS Implementation Complete (Phases 0–6)
 
 ---
 
@@ -11,25 +10,26 @@
 
 1. [Project Overview](#1-project-overview)
 2. [Repository Structure](#2-repository-structure)
-3. [Backend — Spring Boot](#3-backend--spring-boot)
-4. [Frontend — React + Vite](#4-frontend--react--vite)
-5. [Git Branches and Contribution History](#5-git-branches-and-contribution-history)
-6. [What Is NOT Done Yet](#6-what-is-not-done-yet)
+3. [Backend — Spring Boot Architecture & APIs](#3-backend--spring-boot-architecture--apis)
+4. [Frontend — React + Vite Client & Wiring](#4-frontend--react--vite-client--wiring)
+5. [Database Migrations & Seed Data](#5-database-migrations--seed-data)
+6. [Cloudinary File Storage Integration](#6-cloudinary-file-storage-integration)
+7. [Completed Features vs Out-of-Scope Roadmap](#7-completed-features-vs-out-of-scope-roadmap)
 
 ---
 
 ## 1. Project Overview
 
-**Open LMS** is a Next-Generation Learning Management System being built for **Graphic Era University (GEU)**. It is a full-stack web application supporting two user roles:
+**Open LMS** is a Next-Generation Learning Management System built for **Graphic Era University (GEU)**. It is a full-stack platform supporting role-based access for students and faculty:
 
-| Role | Access |
-|------|--------|
-| **Student** | Dashboard, enrolled courses, assignments, quizzes, calendar, messages |
-| **Professor** | Dashboard, course management, assignment grading, gradebook, messages |
+| Role | Access & Capabilities |
+|------|-----------------------|
+| **STUDENT** | Personalized dashboard, enrolled courses, course joining via code, assignments, late submissions, realtime timed quizzes with immediate score/review, resources, and grades |
+| **FACULTY** | Teaching dashboard, course creation & management, student roster control, assignment publishing, grading queue with rubric scoring & feedback, quiz builder, gradebook matrix, and file uploads |
 
-The project is a **monorepo** with two independent sub-projects:
-- `Backend/openlms/` — Spring Boot REST API
-- `Frontend/` — React (Vite) SPA
+The project is structured as a **monorepo**:
+- `Backend/openlms/` — Spring Boot 4.1.1 (Java 17, Spring Data JPA, Spring Security, JWT HS256, MySQL)
+- `Frontend/` — React 18, Vite, Tailwind CSS, Zustand, TanStack Query
 
 ---
 
@@ -39,475 +39,129 @@ The project is a **monorepo** with two independent sub-projects:
 OPEN-LMS/
 ├── Backend/
 │   └── openlms/
+│       ├── db/                      # Sequential migration scripts & seed_demo.sql
 │       ├── pom.xml
 │       └── src/main/java/com/lms/openlms/
 │           ├── OpenlmsApplication.java
-│           ├── config/             # Spring Security config
-│           ├── controller/         # REST controllers
-│           ├── dto/                # Request/Response DTOs
-│           ├── entity/             # JPA entities (DB tables)
-│           └── repository/         # Spring Data JPA repos
+│           ├── config/              # SecurityConfig, CloudinaryConfig
+│           ├── controller/          # 9 REST controllers
+│           ├── dto/                 # Domain DTOs
+│           ├── entity/              # 12 JPA entities
+│           ├── exception/           # Custom exceptions + GlobalExceptionHandler
+│           ├── repository/          # Spring Data JPA repositories
+│           ├── security/            # JwtService, JwtAuthFilter, AuthUser, Handlers
+│           └── service/             # 10 @Transactional service classes
 ├── Frontend/
 │   ├── package.json
 │   ├── vite.config.js
 │   ├── tailwind.config.js
 │   └── src/
-│       ├── main.jsx
-│       ├── app/                    # Router and providers
-│       ├── components/
-│       │   ├── layout/             # Sidebar, Topbar, Layouts
-│       │   └── ui/                 # Button, Card, Input, etc.
+│       ├── app/                     # Router and providers
+│       ├── components/              # Layouts, UI primitives, FileUploader
 │       ├── features/
-│       │   ├── auth/               # Login, Signup
-│       │   ├── landing/            # Landing, Role chooser
-│       │   ├── student/            # Student workspace pages
-│       │   ├── professor/          # Professor workspace pages
-│       │   ├── messages/           # Messaging page
-│       │   └── common/             # NotFoundPage
-│       ├── lib/                    # auth.js, http.js, utils.js
-│       ├── mocks/                  # Mock data for dev/demo
-│       └── store/                  # Zustand state stores
+│       │   ├── auth/                # Login, Student/Professor Signup
+│       │   ├── landing/             # Landing, Role chooser
+│       │   ├── student/             # Student workspace pages
+│       │   ├── professor/           # Professor workspace pages
+│       │   ├── messages/            # Messaging interface (mock)
+│       │   └── common/              # NotFoundPage
+│       ├── lib/                     # apiRequest, authStorage, utils
+│       ├── mocks/                   # Mock fallback fixtures
+│       └── store/                   # Zustand state stores (authStore)
+├── docs/
+│   └── SMOKE_TEST.md                # 15-minute manual smoke test checklist
+├── api_implementation_plan.md       # API Specification and Agent Contract
 ├── readme.md
-├── package.json
 └── what_done_so_far.md
 ```
 
 ---
 
-## 3. Backend — Spring Boot
+## 3. Backend — Spring Boot Architecture & APIs
 
-### 3.1 Tech Stack
+### 3.1 Technology Stack
 
-| Technology | Version / Notes |
-|------------|-----------------|
-| **Spring Boot** | 4.1.1 |
-| **Java** | 17 |
-| **Spring Data JPA** | Hibernate ORM |
-| **Spring Security** | 6.x (stateless, BCrypt) |
-| **Spring Web MVC** | REST API |
-| **MySQL Connector/J** | Runtime JDBC driver |
-| **Spring Boot DevTools** | Hot reload |
-| **Build Tool** | Maven (`mvnw`) |
-| **Port** | `8081` |
+- **Framework:** Spring Boot 4.1.1 on Java 17
+- **Security:** Stateless Spring Security, HS256 signed JWT (`io.jsonwebtoken`), BCrypt password hashing
+- **Persistence:** Spring Data JPA with Hibernate, MySQL 8.x
+- **Storage:** Cloudinary HTTP5 SDK for cloud asset management
+- **Port:** `8081` with base path `/api/v1`
 
-### 3.2 Database and Configuration
+### 3.2 Implemented REST Controllers & Endpoints
 
-- **Database:** MySQL — database name `open_lms`
-- **URL:** `jdbc:mysql://localhost:3306/open_lms?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC`
-- **Default dev credentials:** `root` / `root`
-- **DDL mode:** `none` — schema managed manually, Hibernate does NOT auto-create or alter tables
-- **SQL logging:** enabled with formatting
-- **`open-in-view`:** disabled (stateless API best practice)
+| Domain | Controller | Endpoints |
+|---|---|---|
+| **Auth** | `AuthController` | `POST /auth/register`<br>`POST /auth/login`<br>`GET /auth/me` |
+| **Courses** | `CourseController` | `POST /courses` (Faculty)<br>`GET /courses/my`<br>`GET /courses/{id}`<br>`PATCH /courses/{id}` (Faculty)<br>`DELETE /courses/{id}` (Faculty)<br>`POST /courses/join` (Student)<br>`DELETE /courses/{id}/leave` (Student)<br>`GET /courses/{id}/students` (Faculty)<br>`DELETE /courses/{id}/students/{studentId}` (Faculty) |
+| **Assignments** | `AssignmentController` | `POST /courses/{courseId}/assignments` (Faculty)<br>`GET /courses/{courseId}/assignments`<br>`GET /assignments/my` (Student)<br>`GET /assignments/{id}`<br>`PATCH /assignments/{id}` (Faculty)<br>`DELETE /assignments/{id}` (Faculty) |
+| **Submissions** | `SubmissionController` | `POST /assignments/{assignmentId}/submissions` (Student)<br>`GET /assignments/{assignmentId}/submissions/me` (Student)<br>`GET /assignments/{assignmentId}/submissions` (Faculty)<br>`GET /submissions/my` (Student)<br>`GET /submissions` (Faculty grading queue)<br>`PATCH /submissions/{submissionId}/grade` (Faculty) |
+| **Quizzes** | `QuizController` | `POST /courses/{courseId}/quizzes` (Faculty)<br>`GET /courses/{courseId}/quizzes`<br>`GET /quizzes/{quizId}` (Sanitized student view / complete faculty view)<br>`DELETE /quizzes/{quizId}` (Faculty)<br>`POST /quizzes/{quizId}/attempts/start` (Student)<br>`POST /quizzes/{quizId}/attempts/submit` (Student)<br>`GET /quizzes/{quizId}/attempts/me` (Student)<br>`GET /quizzes/{quizId}/attempts` (Faculty) |
+| **Resources** | `ResourceController` | `POST /courses/{courseId}/resources` (Faculty)<br>`GET /courses/{courseId}/resources`<br>`DELETE /resources/{id}` (Faculty) |
+| **Dashboards** | `DashboardController` | `GET /dashboard/student` (Student)<br>`GET /dashboard/professor` (Faculty) |
+| **Gradebook** | `GradebookController` | `GET /courses/{courseId}/gradebook` (Faculty)<br>`GET /courses/{courseId}/grades/me` (Student) |
+| **Files** | `FileController` | `POST /files/upload` (Authenticated, multipart/form-data) |
 
-### 3.3 Data Model — All 12 JPA Entities
+### 3.3 Strict Layering & Security
 
-All entities use Jakarta Persistence (JPA) annotations in `com.lms.openlms.entity`.
-
-#### `roles` — `Role.java`
-
-| Column | Type | Notes |
-|--------|------|-------|
-| `role_id` | BIGINT PK | Auto-generated |
-| `role_name` | VARCHAR(50) | Unique — `STUDENT`, `FACULTY` |
-
-#### `users` — `User.java`
-
-Unified user table for both students and professors (replaced old `Faculty.java` and `Student.java`).
-
-| Column | Type | Notes |
-|--------|------|-------|
-| `user_id` | BIGINT PK | Auto-generated |
-| `name` | VARCHAR(100) | Not null |
-| `email` | VARCHAR(150) | Unique, not null |
-| `password_hash` | TEXT | BCrypt, not null |
-| `role_id` | BIGINT FK to roles | Eager loaded |
-| `is_active` | BOOLEAN | Default true |
-
-#### `courses` — `Course.java`
-
-| Column | Type | Notes |
-|--------|------|-------|
-| `course_id` | BIGINT PK | Auto-generated |
-| `course_name` | VARCHAR(150) | Not null |
-| `course_code` | VARCHAR(50) | Unique, not null |
-| `professor_id` | BIGINT FK to users | Eager loaded |
-| `description` | *(transient)* | Not persisted yet |
-| `section` | *(transient)* | Default "Section 01", not persisted |
-
-#### `enrollments` — `Enrollment.java`
-
-Maps students to courses (many-to-many junction table).
-
-| Column | Type | Notes |
-|--------|------|-------|
-| `enrollment_id` | BIGINT PK | Auto-generated |
-| `course_id` | BIGINT FK to courses | Unique constraint with student_id |
-| `student_id` | BIGINT FK to users | Unique constraint with course_id |
-
-#### `assignments` — `Assignment.java`
-
-| Column | Type | Notes |
-|--------|------|-------|
-| `assignment_id` | BIGINT PK | Auto-generated |
-| `course_id` | BIGINT FK to courses | Eager loaded |
-| `title` | VARCHAR(150) | Not null |
-| `due_date` | DATETIME | `LocalDateTime`, not null |
-| `max_marks` | INT | Not null |
-| `created_by` | BIGINT FK to users | Eager loaded |
-| `description` | *(transient)* | Not persisted yet |
-
-#### `submissions` — `Submission.java`
-
-One submission per student per assignment (unique constraint).
-
-| Column | Type | Notes |
-|--------|------|-------|
-| `submission_id` | BIGINT PK | Auto-generated |
-| `assignment_id` | BIGINT FK | Unique with student_id |
-| `student_id` | BIGINT FK | Unique with assignment_id |
-| `status` | VARCHAR(50) | Default "Submitted" |
-| `marks_obtained` | INT | Nullable before grading |
-| `submission_text` | *(transient)* | Not persisted yet |
-
-#### `quizzes` — `Quiz.java`
-
-| Column | Type | Notes |
-|--------|------|-------|
-| `quiz_id` | BIGINT PK | Auto-generated |
-| `course_id` | BIGINT FK to courses | Eager loaded |
-| `title` | VARCHAR(150) | Not null |
-| `total_marks` | INT | Not null |
-| `created_by` | BIGINT FK to users | Eager loaded |
-| questions | OneToMany to QuizQuestion | Cascade ALL, lazy |
-
-#### `quiz_questions` — `QuizQuestion.java`
-
-| Column | Type | Notes |
-|--------|------|-------|
-| `question_id` | BIGINT PK | |
-| `quiz_id` | BIGINT FK | |
-| `question_text` | TEXT | Not null |
-| `marks` | INT | Per-question marks |
-| options | OneToMany to QuizOption | Cascade ALL |
-
-#### `quiz_options` — `QuizOption.java`
-
-| Column | Type | Notes |
-|--------|------|-------|
-| `option_id` | BIGINT PK | |
-| `question_id` | BIGINT FK | |
-| `option_text` | VARCHAR(500) | Not null |
-| `is_correct` | BOOLEAN | Marks the correct answer |
-
-#### `quiz_attempts` — `QuizAttempt.java`
-
-One attempt per student per quiz.
-
-| Column | Type | Notes |
-|--------|------|-------|
-| `attempt_id` | BIGINT PK | |
-| `quiz_id` | BIGINT FK | Unique with student_id |
-| `student_id` | BIGINT FK | Unique with quiz_id |
-| `score` | INT | Nullable before grading |
-| `status` | VARCHAR(50) | e.g. IN_PROGRESS, SUBMITTED |
-
-#### `quiz_answers` — `QuizAnswer.java`
-
-Per-question answer for each attempt.
-
-| Column | Type | Notes |
-|--------|------|-------|
-| `answer_id` | BIGINT PK | |
-| `attempt_id` | BIGINT FK | |
-| `question_id` | BIGINT FK | |
-| `selected_option_id` | BIGINT FK | |
-
-#### `resources` — `Resource.java`
-
-Course file uploads.
-
-| Column | Type | Notes |
-|--------|------|-------|
-| `resource_id` | BIGINT PK | |
-| `course_id` | BIGINT FK | |
-| `title` | VARCHAR(150) | Not null |
-| `file_url` | VARCHAR(500) | Not null |
-| `uploaded_by` | BIGINT FK to users | |
+- **Controller → Service → Repository**: Controllers are lightweight and contain no database logic.
+- **Service Layer**: All business rules, role assertions, course membership validation, and transactions live in `@Service` classes.
+- **Security & Authorization**: JWT token claims include `sub` (userId), `email`, `name`, and `role`. Protected endpoints enforce `@PreAuthorize("hasRole('STUDENT')")` or `@PreAuthorize("hasRole('FACULTY')")`, alongside `CourseAccessService` ownership and enrollment checks.
+- **Error Format**: Uniform error payload (`timestamp`, `status`, `error`, `message`, `path`).
 
 ---
 
-### 3.4 Repositories (Data Access Layer)
+## 4. Frontend — React + Vite Client & Wiring
 
-All repositories extend `JpaRepository` in `com.lms.openlms.repository`.
+### 4.1 Client Features & State
 
-| Repository | Notable Custom Queries |
-|------------|----------------------|
-| `UserRepository` | `findByEmail`, `findByRoleRoleName`, `findByRoleRoleId` |
-| `RoleRepository` | `findByRoleNameIgnoreCase` |
-| `CourseRepository` | `findByProfessorUserId` |
-| `EnrollmentRepository` | `findByStudentUserId`, `findByCourseCourseId`, `existsByCourseCourseIdAndStudentUserId`, `countByCourseCourseId` |
-| `AssignmentRepository` | `findByCourseCourseId` |
-| `SubmissionRepository` | `findByAssignmentAssignmentId`, `findByStudentUserId`, `findByAssignmentCourseCourseId` |
-| `QuizRepository` | `findByCourseCourseId` |
-| `QuizQuestionRepository` | `findByQuizQuizId` |
-| `QuizOptionRepository` | `findByQuestionQuestionId` |
-| `QuizAttemptRepository` | `findByQuizQuizIdAndStudentUserId`, `findByStudentUserId` |
-| `QuizAnswerRepository` | `findByAttemptAttemptId` |
-| `ResourceRepository` | `findByCourseCourseId` |
-| `StudentRepository` | *(legacy, basic queries)* |
-
-### 3.5 DTOs (Data Transfer Objects)
-
-Located in `com.lms.openlms.dto`:
-
-| DTO File | Inner Classes |
-|----------|--------------|
-| `AuthDtos.java` | `LoginRequest`, `RegisterRequest`, `AuthResponse` |
-| `CourseDto.java` | `CourseRequest`, `CourseResponse`, `CourseListItem` |
-| `AssignmentDto.java` | `AssignmentRequest`, `AssignmentResponse`, `AssignmentListItem` |
-| `QuizDto.java` | `QuizRequest`, `QuizResponse`, `QuizQuestionDto`, `QuizOptionDto`, `QuizAttemptRequest`, `QuizAttemptResponse`, `QuizAnswerDto` |
-| `SubmissionDto.java` | `SubmissionRequest`, `SubmissionResponse`, `SubmissionGradeRequest` |
-
-### 3.6 Controllers (REST API)
-
-**Base path:** `/api/v1`
-
-#### `AuthController` — `/api/v1/auth`
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/v1/auth/register` | Register new user (Student or Faculty) |
-| `POST` | `/api/v1/auth/login` | Authenticate and return user info + token |
-
-**Register body:**
-```json
-{ "name": "Rahul Sharma", "email": "rahul.sharma@geu.edu", "password": "pass123", "roleName": "STUDENT" }
-```
-
-**Login body:**
-```json
-{ "email": "rahul.sharma@geu.edu", "password": "pass123" }
-```
-
-**Response:**
-```json
-{ "userId": 1, "name": "Rahul Sharma", "email": "rahul.sharma@geu.edu", "role": "STUDENT", "roleId": 2, "token": "session-1", "isActive": true }
-```
-
-> **Note:** Token is a placeholder (`"session-<userId>"`) — JWT is not yet implemented.
-
-### 3.7 Security and CORS
-
-- **Password Encoding:** BCrypt (strength 10)
-- **Session Policy:** STATELESS — no HTTP sessions
-- **CSRF:** Disabled
-- **Authorization:** All routes are currently public (`permitAll`) — no role enforcement yet
-- **CORS:** All origins allowed (`*`), methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+- **Authentication:** `authStore` (Zustand) with local storage synchronization (`authStorage`), token refresh on app load via `GET /auth/me`.
+- **Role Routing:** Dynamic role gating (`StudentLayout` vs. `ProfessorLayout`) based on the JWT role returned by the backend.
+- **Live vs. Mock Execution:** Controlled by `VITE_USE_MOCKS=false`. When `false`, all course, assignment, quiz, resource, dashboard, and grading interactions talk directly to the Spring Boot REST API.
+- **Quizzes:** Interactive quiz-taking engine with server-driven timers (`endsAt`), progress indicators, auto-submission on expiry, and immediate score breakdown without question leaks prior to submission.
+- **Assignments & Grading:** Dynamic badges (`PENDING`, `SUBMITTED`, `APPROVED`, `REJECTED`, `OVERDUE`), resubmission workflows, and instructor grading panel.
+- **File Uploader:** `FileUploader.jsx` drag-and-drop component with progress indicators and Cloudinary integration.
 
 ---
 
-## 4. Frontend — React + Vite
+## 5. Database Migrations & Seed Data
 
-### 4.1 Tech Stack
+The database schema is managed via sequential SQL scripts in `Backend/openlms/db/`:
 
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| **React** | 18.3.1 | UI framework |
-| **Vite** | 5.4.8 | Build tool and dev server |
-| **React Router DOM** | 6.26.2 | Client-side routing |
-| **Zustand** | 4.5.5 | State management |
-| **TailwindCSS** | 3.4.13 | Styling |
-| **Lucide React** | 0.447.0 | Icons |
-| **@tanstack/react-query** | 5.59.0 | Server state (installed, not yet used heavily) |
-| **date-fns** | 3.6.0 | Date formatting |
-| **clsx + tailwind-merge** | — | Class name utilities |
-
-**Backend URL:** `http://localhost:8081/api/v1`
-**Demo mode:** `VITE_USE_MOCKS=true` env variable
-
-### 4.2 Application Entry and Routing
-
-**Entry:** `src/main.jsx` → `src/app/router.jsx`
-
-**Full Route Map:**
-
-| Path | Component | Notes |
-|------|-----------|-------|
-| `/` | `LandingPage` | Public |
-| `/choose-role` | `ChooseRolePage` | Public |
-| `/login` | `LoginPage` | Public |
-| `/signup/student` | `StudentSignupPage` | Public |
-| `/signup/professor` | `StudentSignupPage` | Public (shared form) |
-| `/student/home` | `StudentDashboardPage` | Student |
-| `/student/classes` | `StudentClassesPage` | Student |
-| `/student/classes/:courseId` | `CourseDetailPage` | Student |
-| `/student/calendar` | `StudentCalendarPage` | Student |
-| `/student/assignments` | `StudentAssignmentsPage` | Student |
-| `/student/classes/:courseId/quizzes/:quizId` | `QuizTakingPage` | Student, fullscreen |
-| `/professor/overview` | `ProfessorDashboardPage` | Professor |
-| `/professor/courses` | `ProfessorCoursesPage` | Professor |
-| `/professor/submissions` | `SubmissionsGradingPage` | Professor |
-| `/professor/gradebook` | `ProfessorGradebookPage` | Professor |
-| `/messages` | `MessagesPage` | Shared |
-| `*` | `NotFoundPage` | Fallback |
-
-> Route protection (auth guards) is NOT yet implemented.
-
-### 4.3 State Management
-
-**File:** `src/store/authStore.js` — Zustand
-
-**State:** `{ user, isAuthenticated, role }`
-
-**Actions:**
-- `login(email, password, role, remember)` — hits `/api/v1/auth/login` or mock
-- `register({ name, email, password })` — hits `/api/v1/auth/register` or mock
-- `logout()` — clears storage and resets state
-- `switchRole(newRole)` — dev-only, switches mock user
-
-### 4.4 HTTP and Auth Utilities
-
-- **`src/lib/http.js`** — `apiRequest()` fetch wrapper: auto-attaches Bearer token, normalizes errors
-- **`src/lib/auth.js`** — `authStorage`: manages token + user in localStorage/sessionStorage based on `remember` flag
-- **`src/lib/utils.js`** — `cn()` class merge utility, `COURSE_ACCENTS` color map
-
-### 4.5 Pages and Features
-
-#### Landing / Public
-
-| Page | Description |
-|------|-------------|
-| `LandingPage.jsx` | Marketing page: hero, "Why Open LMS" section, testimonials, CTA |
-| `ChooseRolePage.jsx` | Student vs. Professor role selection before signup |
-
-#### Authentication
-
-| Page | Description |
-|------|-------------|
-| `LoginPage.jsx` | Two-panel layout (dark testimonial + login form). Supports email/password, "keep me signed in", quick demo fill buttons, Google SSO button (UI only). Connects to real backend when not in mock mode |
-| `StudentSignupPage.jsx` | 3-step wizard: Step 1 credentials (name, email, password), Step 2 academic info (program, year, student ID, class code), Step 3 confirmation. Connects to `/api/v1/auth/register`. Used for both student and professor paths |
-
-#### Student Workspace
-
-| Page | Description |
-|------|-------------|
-| `StudentDashboardPage.jsx` | Hero "week at a glance" card, stats (classes, due dates, grade, streak), course progress cards, deadlines list, AI study plan drawer (mock) |
-| `StudentClassesPage.jsx` | Color-coded enrolled course cards with search/filter |
-| `CourseDetailPage.jsx` | Tabbed course view: overview, assignments, quizzes, resources |
-| `StudentAssignmentsPage.jsx` | All assignments across courses with status (submitted/pending/overdue) |
-| `StudentCalendarPage.jsx` | Monthly/weekly calendar with due dates and schedule |
-| `QuizTakingPage.jsx` | Fullscreen quiz experience: question nav, MCQ options, timer, progress, submit confirmation |
-
-#### Professor Workspace
-
-| Page | Description |
-|------|-------------|
-| `ProfessorDashboardPage.jsx` | Teaching overview hero, stats (courses, students, submissions, avg grade), course list, submission queue |
-| `ProfessorCoursesPage.jsx` | Courses grid with enrollment count and actions |
-| `SubmissionsGradingPage.jsx` | Submission list + grading panel (marks, feedback, grade button) |
-| `ProfessorGradebookPage.jsx` | Gradebook table — student grades across assignments |
-
-#### Shared
-
-| Page | Description |
-|------|-------------|
-| `MessagesPage.jsx` | Two-panel messaging (thread list + conversation). Role-aware sender labels. Reply works via local state |
-| `NotFoundPage.jsx` | 404 fallback |
-
-### 4.6 Reusable UI Components
-
-**Layout components:**
-
-| Component | Description |
-|-----------|-------------|
-| `Sidebar.jsx` | Role-aware sidebar with different nav links for Student vs. Professor |
-| `Topbar.jsx` | User avatar, dev role switcher, notifications placeholder, logout |
-| `DashboardLayouts.jsx` | `StudentLayout` and `ProfessorLayout` (Sidebar + Topbar + content) |
-
-**UI primitives:**
-
-| Component | Features |
-|-----------|----------|
-| `Button.jsx` | Variants: `primary`, `secondary`, `ghost`, `danger`; sizes: `sm`, `md`, `lg`; `isLoading` spinner |
-| `Input.jsx` | Labeled input with error state; `PasswordInput` with show/hide toggle and forgot-password link |
-| `Card.jsx` | Base `Card` + `StatCard` for stat numbers |
-| `Badge.jsx` | Color-coded status badges |
-| `Avatar.jsx` | Initials-based avatar |
-| `Modal.jsx` | Overlay modal dialog |
-| `ProgressRing.jsx` | Circular SVG ring + linear `ProgressBar` |
-
-### 4.7 Mock Data Layer
-
-**File:** `src/mocks/mockData.js`
-
-| Export | Contents |
-|--------|----------|
-| `MOCK_USERS` | Student (Rahul Sharma) and Professor (Dr. Priya Sharma) |
-| `MOCK_STUDENT_DASHBOARD` | Stats, course cards with progress, deadlines, AI plan |
-| `MOCK_PROFESSOR_DASHBOARD` | Teaching stats, course list, submission queue |
-| `MOCK_COURSES` | 4 courses: BIO 214, DES 202, MATH 150, PHY 301 |
-| `MOCK_ASSIGNMENTS` | Assignments with due dates and statuses |
-| `MOCK_QUIZZES` | Quiz metadata |
-| `MOCK_QUIZ_QUESTIONS` | Full MCQ question sets with 4 options each |
-| `MOCK_SUBMISSIONS` | Grading status and marks |
-| `MOCK_RESOURCES` | File resource entries |
-| `MOCK_MESSAGES` | Conversation threads |
+1. `phase0_roles.sql` — Base roles (`STUDENT`, `FACULTY`)
+2. `phase1_courses.sql` — Course description and section columns
+3. `phase1_assignments.sql` — Assignment description and attachment URL columns
+4. `phase2_resources.sql` — Resource description and upload timestamp columns
+5. `phase2_submissions.sql` — Submissions text, file URL, feedback, grading timestamps, unique index
+6. `phase3_quizzes.sql` — Quiz duration and attempt start/submission timestamps
+7. `seed_demo.sql` — Idempotent demo dataset with faculty, students, courses, assignments, quizzes, and submissions
 
 ---
 
-## 5. Git Branches and Contribution History
+## 6. Cloudinary File Storage Integration
 
-| Branch | Purpose |
-|--------|---------|
-| `master` | Main integration branch |
-| `database-navdeep` | Database, entities, repos, backend API (Navdeep Bhatt) |
-| `frontend-by-jatin` | Frontend development (Jatin) |
-
-**Pull Requests merged:**
-
-| PR | Summary |
-|----|---------|
-| #1, #2 | Initial backend setup; Faculty and Student entities (now replaced by User) |
-| #3 | Assignment entity added |
-| #4, #5 | Mock data restructure, bug fixes |
-| #6 | Root-level `package.json` and `package-lock.json` added |
-| #7 | Comprehensive project `readme.md` (410+ lines) added |
-| #8 | Frontend refinements; file renames (`Courses.java` to `Course.java`, `Quizzes.java` to `Quiz.java`); pom.xml project name updated |
-| **#9** | **MAJOR** — Replaced Faculty/Student with unified `User` entity; added full Quiz system (QuizQuestion, QuizOption, QuizAttempt, QuizAnswer); added Submission, Enrollment, Resource, Role entities; added all 5 DTO files; added `AuthController` (register + login); added `SecurityConfig` (BCrypt, CORS, stateless); updated frontend auth store and login/signup to connect to real backend |
+- **SDK:** `com.cloudinary:cloudinary-http5:2.0.0`
+- **Environment Variables:** `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`
+- **Upload Endpoint:** `POST /api/v1/files/upload`
+- **Validation:** 10MB file limit, extension and MIME type whitelist, folder partitioning (`resources`, `assignments`, `submissions`).
 
 ---
 
-## 6. What Is NOT Done Yet
+## 7. Completed Features vs Out-of-Scope Roadmap
 
-### Backend
+### Completed (100%)
+- [x] Full JWT Authentication & Authorization (Roles: `STUDENT`, `FACULTY`)
+- [x] Complete REST API Suite (Courses, Assignments, Submissions, Quizzes, Resources, Dashboards, Gradebook, Files)
+- [x] All 10 Service classes with rigorous access controls
+- [x] Frontend wiring for all student and professor pages to live backend APIs
+- [x] Interactive quiz taking with timed sessions and immediate review
+- [x] Inline assignment submission and grading workflow with feedback
+- [x] Gradebook calculation matrix across assignments and quizzes
+- [x] Cloudinary cloud upload integration with `FileUploader` component
+- [x] Idempotent database seed script (`seed_demo.sql`) and migration documentation
+- [x] Comprehensive 15-minute smoke test checklist (`docs/SMOKE_TEST.md`)
 
-- [ ] **JWT Authentication** — token is currently a placeholder `"session-<userId>"`; no signed JWT
-- [ ] **Role-based Authorization** — all routes are `permitAll`; no `@PreAuthorize` or method security
-- [ ] **Course Controller** — no REST endpoints to create, list, or enroll in courses
-- [ ] **Assignment Controller** — no REST endpoints to create or fetch assignments
-- [ ] **Quiz Controller** — no REST endpoints for quizzes or quiz-taking
-- [ ] **Submission Controller** — no REST endpoints to submit assignments or grade them
-- [ ] **Resource Controller** — no REST endpoints for course file resources
-- [ ] **Service Layer** — no `@Service` classes; business logic sits directly in `AuthController`
-- [ ] **File Upload** — `Resource.file_url` is a plain URL; no file storage (S3, local disk) integrated
-- [ ] **Database Seeding / Migration** — `roles` table must be seeded manually; no Flyway or Liquibase
-- [ ] **`description` and `section` persistence** in `Course.java` — currently `@Transient`
-- [ ] **`description` persistence** in `Assignment.java` — currently `@Transient`
-- [ ] **`submissionText` persistence** in `Submission.java` — currently `@Transient`
-
-### Frontend
-
-- [ ] **Route Guards / Auth Protection** — unauthenticated users can access all protected routes
-- [ ] **Real API integration for courses, assignments, quizzes, submissions** — all pages still use mock data even when `VITE_USE_MOCKS=false`
-- [ ] **Professor-specific signup fields** — professor signup reuses student form; no department or faculty ID fields
-- [ ] **Google SSO** — button on login page shows "not configured" error; not implemented
-- [ ] **Messages persistence** — messages are local React state only; not saved to any backend
-- [ ] **Notifications** — topbar bell icon is a placeholder; no real notification data
-- [ ] **Forgot Password flow** — link exists in login form; no implementation
-- [ ] **File upload UI** — resources tab in `CourseDetailPage` shows list but has no upload functionality
-- [ ] **Calendar backend sync** — calendar shows mock due dates only; no real API data
-- [ ] **Real-time features** — no WebSocket or SSE for live updates (quiz timers, submission notifications)
-
----
-
-> **Summary:** The project has a solid foundation. The frontend UI is nearly complete in design and layout, running fully in mock mode for easy demos. The backend has a well-structured normalized data model and a working Auth API (register + login with BCrypt). The main next steps are: building remaining backend controllers and a proper service layer, implementing JWT authentication, and wiring all frontend pages to real API data.
+### Out-of-Scope / Retained as Mock / Future Roadmap
+- [ ] **Messages Persistence** — Messaging UI uses local React state (mock)
+- [ ] **Notifications Bell** — Topbar notification dropdown uses local mock items
+- [ ] **Google SSO** — Button on login displays mock guidance
+- [ ] **WebSockets** — Live real-time chat and push alerts
