@@ -1,6 +1,7 @@
 package com.lms.openlms.entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "submissions", uniqueConstraints = {
@@ -21,13 +22,25 @@ public class Submission {
     private User student;
 
     @Column(name = "status", nullable = false, length = 50)
-    private String status = "Submitted";
+    private String status = "SUBMITTED";
 
     @Column(name = "marks_obtained")
     private Integer marksObtained;
 
-    @Transient
+    @Column(name = "submission_text", columnDefinition = "TEXT")
     private String submissionText;
+
+    @Column(name = "file_url", length = 500)
+    private String fileUrl;
+
+    @Column(name = "feedback", columnDefinition = "TEXT")
+    private String feedback;
+
+    @Column(name = "submitted_at")
+    private LocalDateTime submittedAt;
+
+    @Column(name = "graded_at")
+    private LocalDateTime gradedAt;
 
     public Submission() {}
 
@@ -37,6 +50,14 @@ public class Submission {
 
     public void setSubmissionId(Long submissionId) {
         this.submissionId = submissionId;
+    }
+
+    public Long getId() {
+        return submissionId;
+    }
+
+    public void setId(Long id) {
+        this.submissionId = id;
     }
 
     public Assignment getAssignment() {
@@ -77,5 +98,37 @@ public class Submission {
 
     public void setSubmissionText(String submissionText) {
         this.submissionText = submissionText;
+    }
+
+    public String getFileUrl() {
+        return fileUrl;
+    }
+
+    public void setFileUrl(String fileUrl) {
+        this.fileUrl = fileUrl;
+    }
+
+    public String getFeedback() {
+        return feedback;
+    }
+
+    public void setFeedback(String feedback) {
+        this.feedback = feedback;
+    }
+
+    public LocalDateTime getSubmittedAt() {
+        return submittedAt;
+    }
+
+    public void setSubmittedAt(LocalDateTime submittedAt) {
+        this.submittedAt = submittedAt;
+    }
+
+    public LocalDateTime getGradedAt() {
+        return gradedAt;
+    }
+
+    public void setGradedAt(LocalDateTime gradedAt) {
+        this.gradedAt = gradedAt;
     }
 }

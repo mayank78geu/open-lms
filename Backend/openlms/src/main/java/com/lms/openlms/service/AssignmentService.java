@@ -186,11 +186,12 @@ public class AssignmentService {
         if (submissionOpt.isPresent()) {
             Submission s = submissionOpt.get();
             res.setMyStatus(s.getStatus() != null ? s.getStatus() : "SUBMITTED");
+            boolean isLate = s.getSubmittedAt() != null && s.getSubmittedAt().isAfter(a.getDueDate());
             res.setMySubmission(new AssignmentDto.MySubmissionSummary(
                     s.getSubmissionId(),
                     s.getStatus(),
                     s.getMarksObtained(),
-                    false
+                    isLate
             ));
         } else {
             if (LocalDateTime.now().isAfter(a.getDueDate())) {
