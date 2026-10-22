@@ -28,8 +28,11 @@ public class Assignment {
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
 
-    @Transient
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
+
+    @Column(name = "attachment_url", length = 500)
+    private String attachmentUrl;
 
     public Assignment() {}
 
@@ -95,5 +98,13 @@ public class Assignment {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getAttachmentUrl() {
+        return attachmentUrl;
+    }
+
+    public void setAttachmentUrl(String attachmentUrl) {
+        this.attachmentUrl = attachmentUrl;
     }
 }
