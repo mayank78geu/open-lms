@@ -22,6 +22,9 @@ public class Quiz {
     @Column(name = "total_marks", nullable = false)
     private Integer totalMarks;
 
+    @Column(name = "duration_minutes")
+    private Integer durationMinutes;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
@@ -77,6 +80,14 @@ public class Quiz {
 
     public void setCreatedBy(User createdBy) {
         this.createdBy = createdBy;
+    }
+
+    public Integer getDurationMinutes() {
+        return durationMinutes;
+    }
+
+    public void setDurationMinutes(Integer durationMinutes) {
+        this.durationMinutes = durationMinutes;
     }
 
     public List<QuizQuestion> getQuestions() {

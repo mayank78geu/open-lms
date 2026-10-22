@@ -1,6 +1,7 @@
 package com.lms.openlms.entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "quiz_attempts")
@@ -20,6 +21,15 @@ public class QuizAttempt {
 
     @Column(name = "score")
     private Integer score;
+
+    @Column(name = "status", nullable = false, length = 50)
+    private String status = "IN_PROGRESS";
+
+    @Column(name = "started_at")
+    private LocalDateTime startedAt;
+
+    @Column(name = "submitted_at")
+    private LocalDateTime submittedAt;
 
     public QuizAttempt() {}
 
@@ -67,5 +77,29 @@ public class QuizAttempt {
 
     public void setScore(Integer score) {
         this.score = score;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getStartedAt() {
+        return startedAt;
+    }
+
+    public void setStartedAt(LocalDateTime startedAt) {
+        this.startedAt = startedAt;
+    }
+
+    public LocalDateTime getSubmittedAt() {
+        return submittedAt;
+    }
+
+    public void setSubmittedAt(LocalDateTime submittedAt) {
+        this.submittedAt = submittedAt;
     }
 }

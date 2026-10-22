@@ -10,6 +10,9 @@ import java.util.Optional;
 @Repository
 public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, Long> {
     List<QuizAttempt> findByQuizQuizId(Long quizId);
+    List<QuizAttempt> findByQuizQuizIdOrderByAttemptIdDesc(Long quizId);
     List<QuizAttempt> findByStudentUserId(Long studentId);
+    List<QuizAttempt> findByStudentUserIdAndQuizQuizIdIn(Long studentId, List<Long> quizIds);
     Optional<QuizAttempt> findByQuizQuizIdAndStudentUserId(Long quizId, Long studentId);
+    boolean existsByQuizQuizId(Long quizId);
 }
