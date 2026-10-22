@@ -9,5 +9,6 @@ import java.util.List;
 @Repository
 public interface ResourceRepository extends JpaRepository<Resource, Long> {
     List<Resource> findByCourseCourseId(Long courseId);
+    List<Resource> findByCourseCourseIdOrderByUploadedAtDesc(Long courseId);
     List<Resource> findByUploadedByUserId(Long uploadedById);
 }

@@ -1,6 +1,7 @@
 package com.lms.openlms.entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "resources")
@@ -17,12 +18,18 @@ public class Resource {
     @Column(name = "title", nullable = false, length = 150)
     private String title;
 
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
     @Column(name = "file_url", nullable = false, length = 500)
     private String fileUrl;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "uploaded_by", nullable = false)
     private User uploadedBy;
+
+    @Column(name = "uploaded_at")
+    private LocalDateTime uploadedAt;
 
     public Resource() {}
 
@@ -58,6 +65,14 @@ public class Resource {
         this.title = title;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public String getFileUrl() {
         return fileUrl;
     }
@@ -72,5 +87,13 @@ public class Resource {
 
     public void setUploadedBy(User uploadedBy) {
         this.uploadedBy = uploadedBy;
+    }
+
+    public LocalDateTime getUploadedAt() {
+        return uploadedAt;
+    }
+
+    public void setUploadedAt(LocalDateTime uploadedAt) {
+        this.uploadedAt = uploadedAt;
     }
 }
