@@ -90,6 +90,44 @@ public class AuthDtos {
         }
     }
 
+    public static class GoogleLoginRequest {
+        private String credential;
+        private String accessToken;
+        private String roleName;
+
+        public GoogleLoginRequest() {}
+
+        public GoogleLoginRequest(String credential, String accessToken, String roleName) {
+            this.credential = credential;
+            this.accessToken = accessToken;
+            this.roleName = roleName;
+        }
+
+        public String getCredential() {
+            return credential;
+        }
+
+        public void setCredential(String credential) {
+            this.credential = credential;
+        }
+
+        public String getAccessToken() {
+            return accessToken;
+        }
+
+        public void setAccessToken(String accessToken) {
+            this.accessToken = accessToken;
+        }
+
+        public String getRoleName() {
+            return roleName;
+        }
+
+        public void setRoleName(String roleName) {
+            this.roleName = roleName;
+        }
+    }
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class AuthResponse {
         private Long userId;

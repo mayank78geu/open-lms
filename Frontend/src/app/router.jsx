@@ -1,10 +1,8 @@
 import React from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
-import { AuthenticateWithRedirectCallback } from '@clerk/clerk-react';
 import { LandingPage } from '../features/landing/LandingPage';
 import { ChooseRolePage } from '../features/landing/ChooseRolePage';
 import { LoginPage } from '../features/auth/LoginPage';
-import { SsoCallbackPage } from '../features/auth/SsoCallbackPage';
 import { StudentSignupPage } from '../features/auth/StudentSignupPage';
 import { StudentLayout, ProfessorLayout } from '../components/layout/DashboardLayouts';
 import { RequireAuth, RequireRole } from '../components/layout/RouteGuards';
@@ -56,20 +54,16 @@ export const router = createBrowserRouter([
     element: <StudentSignupPage />,
   },
   {
+    path: '/signup/teacher',
+    element: <StudentSignupPage />,
+  },
+  {
     path: '/health',
     element: <ApiHealthPage />,
   },
   {
     path: '/api-status',
     element: <ApiHealthPage />,
-  },
-  {
-    path: '/sso-callback',
-    element: <AuthenticateWithRedirectCallback />,
-  },
-  {
-    path: '/sso-complete',
-    element: <SsoCallbackPage />,
   },
 
   // Focus Mode Quiz (no sidebar)

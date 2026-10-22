@@ -20,6 +20,7 @@ import {
   CheckCircle2,
   AlertCircle,
   HelpCircle,
+  Check,
 } from 'lucide-react';
 import { COURSE_ACCENTS } from '../../lib/utils';
 
@@ -105,21 +106,32 @@ export function StudentDashboardPage() {
           {/* Right Progress Ring & CTA */}
           <div className="flex items-center gap-6 shrink-0 self-stretch md:self-auto justify-between md:justify-end">
             <ProgressRing
-              value={dashboardData?.stats?.averageGradePercent ? Math.round(dashboardData.stats.averageGradePercent) : 80}
+              value={dashboardData?.stats?.averageGradePercent ? Math.round(dashboardData.stats.averageGradePercent) : 0}
               size={100}
               strokeWidth={8}
               label="PROGRESS"
               trackColor="rgba(255, 255, 255, 0.2)"
               progressColor="#FFFFFF"
             />
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsPlanDrawerOpen(true)}
-              className="bg-white/95 text-brand-700 hover:bg-white hover:text-brand-800 border-none font-bold shadow-md rounded-xl text-xs px-4 py-2.5"
-            >
-              Review plan
-            </Button>
+            {courses.length === 0 ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate('/student/classes')}
+                className="bg-white/95 text-brand-700 hover:bg-white hover:text-brand-800 border-none font-bold shadow-md rounded-xl text-xs px-4 py-2.5"
+              >
+                Join a class
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsPlanDrawerOpen(true)}
+                className="bg-white/95 text-brand-700 hover:bg-white hover:text-brand-800 border-none font-bold shadow-md rounded-xl text-xs px-4 py-2.5"
+              >
+                Review plan
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -300,56 +312,35 @@ export function StudentDashboardPage() {
         isOpen={isPlanDrawerOpen}
         onClose={() => setIsPlanDrawerOpen(false)}
         title="Weekly Learning Plan"
-        description="Priority breakdown for the current semester based on active course syllabi and deadlines."
+        description="Priority breakdown for the current semester based on active coursework and deadlines."
       >
         <div className="space-y-3 pt-2">
-          <div className="bg-amber-50 border border-amber-200/90 rounded-xl p-3 flex items-start gap-2.5 text-amber-900 mb-2">
-            <Sparkles className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-            <p className="text-xs leading-relaxed">
-              <strong className="font-semibold text-amber-950">Work in Progress:</strong> AI-powered dynamic weekly study pacing is currently in development. Demonstrative study plan schedule is shown below.
-            </p>
-          </div>
-          <div className="p-3 rounded-xl bg-violet-50 border border-violet-100 flex items-start gap-3">
-            <span className="w-6 h-6 rounded-full bg-violet-600 text-white flex items-center justify-center text-xs font-bold shrink-0">
-              1
-            </span>
-            <div>
-              <p className="text-xs font-bold text-violet-900">Cell Biology Quiz 2</p>
-              <p className="text-[11px] text-violet-700 mt-0.5">
-                Starts at 10:30 AM today. 10 questions on cell structure & microscopy.
-              </p>
-              <Link
-                to="/student/classes/bio-214/quizzes/quiz-2"
-                className="text-xs font-semibold text-brand-600 underline mt-2 inline-block"
-              >
-                Launch quiz now →
-              </Link>
+          {upcoming.length === 0 ? (
+            <div className="p-6 text-center text-ink-muted">
+              <Check className="w-8 h-8 text-emerald-500 mx-auto mb-2" />
+              <p className="text-sm font-semibold text-ink">You're all caught up!</p>
+              <p className="text-xs mt-1">No upcoming deadlines or urgent tasks for this week.</p>
             </div>
-          </div>
-
-          <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-start gap-3">
-            <span className="w-6 h-6 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-xs font-bold shrink-0">
-              2
-            </span>
-            <div>
-              <p className="text-xs font-bold text-ink">Lab reflection 03 write-up</p>
-              <p className="text-[11px] text-ink-muted mt-0.5">
-                Due Monday 11:59 PM. Dialysis tubing data and membrane transport notes.
-              </p>
-            </div>
-          </div>
-
-          <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-start gap-3">
-            <span className="w-6 h-6 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-xs font-bold shrink-0">
-              3
-            </span>
-            <div>
-              <p className="text-xs font-bold text-ink">Design sprint critique prep</p>
-              <p className="text-[11px] text-ink-muted mt-0.5">
-                DES 202 wireframe upload due tomorrow at 2:00 PM.
-              </p>
-            </div>
-          </div>
+          ) : (
+            upcoming.map((item, idx) => (
+              <div key={idx} className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-start gap-3">
+                <span className="w-6 h-6 rounded-full bg-brand-600 text-white flex items-center justify-center text-xs font-bold shrink-0">
+                  {idx + 1}
+                </span>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-bold text-ink">{item.title}</p>
+                    <span className="text-[10px] font-semibold text-brand-600 bg-brand-50 px-2 py-0.5 rounded">
+                      {item.courseCode}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-ink-muted mt-0.5">
+                    Due: {item.dueDate ? new Date(item.dueDate).toLocaleDateString() : 'Upcoming'} · {item.type || 'Coursework'}
+                  </p>
+                </div>
+              </div>
+            ))
+          )}
         </div>
 
         <div className="pt-4 flex justify-end">

@@ -7,10 +7,7 @@ import { useAuthStore } from '../../store/authStore';
 export function ChooseRolePage() {
   const [selectedRole, setSelectedRole] = useState('STUDENT');
   const navigate = useNavigate();
-  const { switchRole } = useAuthStore();
-
   const handleContinue = (role) => {
-    switchRole(role);
     if (role === 'STUDENT') {
       navigate('/signup/student');
     } else {

@@ -2,40 +2,45 @@ import React, { useState } from 'react';
 import { SearchInput } from '../ui/Input';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
-import { Bell, Plus, ChevronDown, Check, GraduationCap, Briefcase } from 'lucide-react';
+import { Bell, Plus, ChevronDown, Check, GraduationCap, Briefcase, Info } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { useNavigate } from 'react-router-dom';
+import { joinCourse } from '../../lib/api/coursesApi';
 
 export function Topbar({ title, subtitle }) {
-  const { role, user, switchRole } = useAuthStore();
+  const { role, user } = useAuthStore();
   const navigate = useNavigate();
 
   // Modals & popovers state
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [classCode, setClassCode] = useState('');
   const [isJoinSuccess, setIsJoinSuccess] = useState(false);
+  const [isJoining, setIsJoining] = useState(false);
+  const [joinError, setJoinError] = useState('');
   const [isCreateDropdownOpen, setIsCreateDropdownOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [hasUnread, setHasUnread] = useState(true);
 
-  const handleJoinClass = (e) => {
+  const handleJoinClass = async (e) => {
     e.preventDefault();
-    if (classCode.trim().length >= 6) {
+    const cleanCode = classCode.trim().toUpperCase();
+    if (!cleanCode) return;
+    setJoinError('');
+    setIsJoining(true);
+    try {
+      await joinCourse({ courseCode: cleanCode });
       setIsJoinSuccess(true);
       setTimeout(() => {
         setIsJoinSuccess(false);
         setIsJoinModalOpen(false);
         setClassCode('');
-      }, 1200);
-    }
-  };
-
-  const handleRoleToggle = async () => {
-    const nextRole = role === 'PROFESSOR' ? 'STUDENT' : 'PROFESSOR';
-    try {
-      await switchRole(nextRole);
-      navigate(nextRole === 'PROFESSOR' ? '/professor/overview' : '/student/home');
+        navigate('/student/classes');
+        window.location.reload();
+      }, 1000);
     } catch (err) {
-      console.error('Role toggle failed:', err);
+      setJoinError(err.message || 'Invalid class code or already enrolled.');
+    } finally {
+      setIsJoining(false);
     }
   };
 
@@ -67,16 +72,12 @@ export function Topbar({ title, subtitle }) {
 
         {/* Right Actions */}
         <div className="flex items-center gap-3.5">
-          {/* Quick role switcher pill */}
-          <button
-            onClick={handleRoleToggle}
-            className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 transition-colors"
-            title="Click to toggle between Student and Professor view"
-          >
+          {/* User Role Badge */}
+          <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-brand-50 text-brand-700 border border-brand-200">
             {role === 'PROFESSOR' ? (
               <>
                 <Briefcase className="w-3.5 h-3.5" />
-                <span>Prof View</span>
+                <span>Faculty Workspace</span>
               </>
             ) : (
               <>
@@ -84,8 +85,7 @@ export function Topbar({ title, subtitle }) {
                 <span>Student View</span>
               </>
             )}
-            <span className="text-[10px] text-brand-500 font-normal underline ml-0.5">switch</span>
-          </button>
+          </div>
 
           {/* Search Bar */}
           <SearchInput placeholder="Search Open LMS..." />
@@ -170,31 +170,47 @@ export function Topbar({ title, subtitle }) {
           {/* Notification Bell */}
           <div className="relative">
             <button
-              onClick={() => setNotificationsOpen(!notificationsOpen)}
+              onClick={() => {
+                setNotificationsOpen(!notificationsOpen);
+                setHasUnread(false);
+              }}
               className="w-9 h-9 rounded-lg border border-ink-border bg-white flex items-center justify-center text-ink-muted hover:text-ink hover:bg-slate-50 transition-colors relative"
             >
               <Bell className="w-4 h-4" />
-              <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-brand-500 ring-2 ring-white" />
+              {hasUnread && (
+                <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-brand-500 ring-2 ring-white" />
+              )}
             </button>
             {notificationsOpen && (
-              <div className="absolute right-0 mt-2 w-72 bg-white border border-ink-border rounded-xl shadow-hero p-3 z-50 text-xs">
-                <div className="flex items-center justify-between pb-2 border-b border-ink-border mb-2">
+              <div className="absolute right-0 mt-2 w-80 bg-white border border-ink-border rounded-xl shadow-hero p-3.5 z-50 text-xs">
+                <div className="flex items-center justify-between pb-2 border-b border-ink-border mb-2.5">
                   <span className="font-bold text-ink">Notifications</span>
-                  <span className="text-[10px] text-brand-600 font-semibold cursor-pointer">
+                  <button
+                    onClick={() => setHasUnread(false)}
+                    className="text-[10px] text-brand-600 font-semibold hover:underline cursor-pointer"
+                  >
                     Mark all read
-                  </span>
+                  </button>
                 </div>
-                <div className="text-[10px] text-amber-800 bg-amber-50 p-2 rounded-lg border border-amber-200/80 mb-2 leading-relaxed">
-                  <span className="font-semibold">Work in Progress:</span> Real-time notifications service is under development. Demonstrative previews shown.
-                </div>
-                <div className="space-y-2">
-                  <div className="p-2 rounded-lg bg-brand-50/60 text-ink">
-                    <p className="font-semibold text-xs">CS 301 Assignment 1 graded</p>
-                    <p className="text-[10px] text-ink-muted mt-0.5">Score: 92/100 · Feedback available</p>
+                <div className="space-y-2.5">
+                  <div className="p-3 rounded-xl bg-brand-50/70 border border-brand-100 text-ink">
+                    <p className="font-bold text-xs text-brand-950 flex items-center gap-1.5">
+                      <span>Welcome to Open LMS!</span> 👋
+                    </p>
+                    <p className="text-[11px] text-brand-800 mt-1 leading-relaxed">
+                      {role === 'PROFESSOR'
+                        ? 'Your teaching portal is active. Create courses, upload study resources, and manage student submissions.'
+                        : 'Your student account is active. Use the "+ Join a class" button above with your instructor\'s class code to enroll.'}
+                    </p>
+                    <span className="text-[10px] text-brand-600 font-semibold block mt-1.5">Just now</span>
                   </div>
-                  <div className="p-2 rounded-lg hover:bg-slate-50 text-ink transition-colors">
-                    <p className="font-semibold text-xs">Prof. Priya Sharma updated Data Structures</p>
-                    <p className="text-[10px] text-ink-muted mt-0.5">Course syllabus PDF uploaded</p>
+
+                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 text-ink">
+                    <p className="font-bold text-xs text-slate-900">Academic Account Verified</p>
+                    <p className="text-[11px] text-ink-muted mt-1 leading-relaxed">
+                      Signed in as <span className="font-semibold text-slate-700">{user?.email || 'authenticated user'}</span> ({role === 'PROFESSOR' ? 'Faculty' : 'Student'}).
+                    </p>
+                    <span className="text-[10px] text-ink-muted font-medium block mt-1.5">Today</span>
                   </div>
                 </div>
               </div>
@@ -206,23 +222,33 @@ export function Topbar({ title, subtitle }) {
       {/* Join a Class Modal */}
       <Modal
         isOpen={isJoinModalOpen}
-        onClose={() => setIsJoinModalOpen(false)}
+        onClose={() => {
+          setIsJoinModalOpen(false);
+          setJoinError('');
+        }}
         title="Join a class"
-        description="Enter the 6-digit class code provided by your instructor to enroll."
+        description="Enter the unique class code provided by your instructor to enroll."
       >
         <form onSubmit={handleJoinClass} className="space-y-4 pt-2">
+          {joinError && (
+            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 font-semibold flex items-center gap-2">
+              <span>{joinError}</span>
+            </div>
+          )}
+
           <div>
             <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-2">
               Class Code
             </label>
             <input
               type="text"
-              maxLength={6}
+              maxLength={12}
               value={classCode}
               onChange={(e) => setClassCode(e.target.value.toUpperCase())}
-              placeholder="e.g. BIO214"
+              placeholder="e.g. CS-301 or K7M2QX"
               className="w-full text-center tracking-widest text-lg font-mono font-bold uppercase py-3 border border-ink-border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-400"
               required
+              autoFocus
             />
           </div>
 
@@ -230,7 +256,11 @@ export function Topbar({ title, subtitle }) {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setIsJoinModalOpen(false)}
+              type="button"
+              onClick={() => {
+                setIsJoinModalOpen(false);
+                setJoinError('');
+              }}
             >
               Cancel
             </Button>
@@ -238,9 +268,11 @@ export function Topbar({ title, subtitle }) {
               variant="primary"
               size="sm"
               type="submit"
-              disabled={classCode.length < 6}
+              disabled={!classCode.trim() || isJoining}
             >
-              {isJoinSuccess ? (
+              {isJoining ? (
+                'Enrolling...'
+              ) : isJoinSuccess ? (
                 <span className="flex items-center gap-1.5">
                   <Check className="w-4 h-4 text-white" /> Enrolled!
                 </span>

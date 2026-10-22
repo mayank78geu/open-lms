@@ -84,6 +84,24 @@ export const useAuthStore = create((set, get) => ({
     return user;
   },
 
+  googleLogin: async ({ credential, accessToken, roleName = null }, remember = true) => {
+    if (!useMocks) {
+      const user = await apiRequest('/auth/google', {
+        method: 'POST',
+        body: JSON.stringify({ credential, accessToken, roleName }),
+      });
+      authStorage.setToken(user.token, remember);
+      authStorage.setUser(user, remember);
+      set({ user, isAuthenticated: true, role: user.role });
+      return user;
+    }
+    const userToSet = (roleName === 'PROFESSOR' || roleName === 'FACULTY') ? MOCK_USERS.professor : MOCK_USERS.student;
+    authStorage.setToken('mock-jwt-token-' + Date.now(), remember);
+    authStorage.setUser(userToSet, remember);
+    set({ user: userToSet, isAuthenticated: true, role: userToSet.role });
+    return userToSet;
+  },
+
   switchRole: async (newRole) => {
     if (!useMocks) {
       const email = (newRole === 'PROFESSOR' || newRole === 'FACULTY')

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ExternalLink,
@@ -8,79 +8,63 @@ import {
   Lock,
   ChevronRight,
   MessageSquare,
-  AlertCircle,
   BookOpen,
   Calendar,
   Users,
+  Layers,
+  HelpCircle,
+  FileCheck,
 } from 'lucide-react';
 import { Button } from '../../../components/ui/Button';
 import { Avatar } from '../../../components/ui/Avatar';
+import { Badge } from '../../../components/ui/Badge';
+import { listResources } from '../../../lib/api/resourcesApi';
+import { listCourseAssignments } from '../../../lib/api/assignmentsApi';
+import { listCourseQuizzes } from '../../../lib/api/quizzesApi';
 
 export function OverviewTab({ course, setActiveTab }) {
   const navigate = useNavigate();
+  const courseId = course?.courseId || course?.id;
+
+  const [resources, setResources] = useState([]);
+  const [assignments, setAssignments] = useState([]);
+  const [quizzes, setQuizzes] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!courseId) return;
+    let mounted = true;
+    setLoading(true);
+
+    Promise.all([
+      listResources(courseId).catch(() => []),
+      listCourseAssignments(courseId).catch(() => []),
+      listCourseQuizzes(courseId).catch(() => []),
+    ]).then(([resData, assignData, quizData]) => {
+      if (mounted) {
+        setResources(resData || []);
+        setAssignments(assignData || []);
+        setQuizzes(quizData || []);
+        setLoading(false);
+      }
+    });
+
+    return () => {
+      mounted = false;
+    };
+  }, [courseId]);
 
   const instructorName = course?.instructor || course?.professorName || 'Faculty Instructor';
-  const instructorInitials = instructorName
-    .split(' ')
-    .filter(Boolean)
-    .map((n) => n[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase() || 'FI';
+  const instructorInitials =
+    instructorName
+      .split(' ')
+      .filter(Boolean)
+      .map((n) => n[0])
+      .slice(0, 2)
+      .join('')
+      .toUpperCase() || 'FI';
 
-  const defaultNextClass = {
-    title: 'Upcoming Lecture: Advanced Problem Solving & Discussion',
-    time: 'Next Session · Scheduled Office & Lecture Hours',
-    description: course?.description || 'Active class session covering core syllabus fundamentals.',
-    prepare: 'Review previous lecture notes and submit pending assignments prior to class.',
-  };
-
-  const nextClass = course?.nextClass || defaultNextClass;
-
-  const defaultModules = course?.modules || [
-    {
-      id: 1,
-      number: '01',
-      title: 'Module 1: Foundations & Core Concepts',
-      summary: 'Introduction, theoretical foundations, and syllabus review.',
-      status: 'complete',
-    },
-    {
-      id: 2,
-      number: '02',
-      title: 'Module 2: Practical Applications & Core Analysis',
-      summary: 'Practical implementations, analytical methods, and problem sets.',
-      status: 'in_progress',
-    },
-    {
-      id: 3,
-      number: '03',
-      title: 'Module 3: Advanced Architectures & Case Studies',
-      summary: 'Optimization, synthesis, and final project preparations.',
-      status: 'locked',
-    },
-  ];
-
-  const thisWeekItems = course?.thisWeek || [
-    {
-      id: 'w1',
-      title: 'View Active Course Assignments',
-      time: 'Check Deadlines & Rubrics',
-      tab: 'Assignments',
-    },
-    {
-      id: 'w2',
-      title: 'Browse Syllabus & Course Files',
-      time: 'Lecture Slides & Resources',
-      tab: 'Resources',
-    },
-    {
-      id: 'w3',
-      title: 'Take Course Quizzes',
-      time: 'Knowledge Check & Practice',
-      tab: 'Quizzes',
-    },
-  ];
+  const realModules = course?.modules || [];
 
   return (
     <div className="space-y-6">
@@ -111,163 +95,289 @@ export function OverviewTab({ course, setActiveTab }) {
         <div>
           <h3 className="text-sm font-bold text-ink mb-1">About this course</h3>
           <p className="text-xs text-ink-muted leading-relaxed">
-            {course?.description || 'Comprehensive university curriculum designed for deep conceptual mastery and practical problem solving.'}
+            {course?.description || 'Welcome to this course curriculum.'}
           </p>
         </div>
       </div>
 
       {/* Main Grid: Left Column & Right Column */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-7">
-        {/* Left Column (8 cols): Next Class & Modules */}
+        {/* Left Column (8 cols): Real Materials, Real Assignments, Modules */}
         <div className="lg:col-span-8 space-y-6">
-          {/* Work in Progress notice for demonstrative lecture notes viewer */}
-          <div className="bg-amber-50 border border-amber-200/90 rounded-2xl p-4 flex items-start gap-3 text-amber-900 shadow-soft">
-            <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-            <div className="space-y-0.5">
-              <h4 className="text-xs font-bold text-amber-950 uppercase tracking-wide">
-                Work in Progress · Syllabus Pacing & Lecture Deck Viewer
-              </h4>
-              <p className="text-xs text-amber-800 leading-relaxed">
-                Real-time syllabus milestone tracking and in-app slide deck rendering are currently under development. The interactive lecture notes and module checkpoints below are demonstrative preview data.
-              </p>
-            </div>
-          </div>
-
-          {/* Next Class Card */}
+          {/* Real Learning Materials & Resources Section */}
           <div className="bg-white rounded-2xl border border-ink-border p-6 shadow-soft space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-brand-600">
-                {nextClass.time}
-              </span>
+              <div>
+                <h3 className="text-base font-bold text-ink">Course resources & materials</h3>
+                <p className="text-xs text-ink-muted mt-0.5">
+                  Lecture slides, syllabi, and reference files uploaded by your instructor.
+                </p>
+              </div>
               <button
                 type="button"
                 onClick={() => setActiveTab('Resources')}
-                className="text-xs font-semibold text-brand-600 hover:text-brand-700 flex items-center gap-1"
+                className="text-xs font-semibold text-brand-600 hover:text-brand-700 flex items-center gap-1 shrink-0"
               >
-                View course resources
+                Browse All ({resources.length})
                 <ExternalLink className="w-3.5 h-3.5" />
               </button>
             </div>
 
-            <div>
-              <h3 className="text-lg font-bold text-ink">
-                {nextClass.title}
-              </h3>
-              <p className="text-xs text-ink-muted mt-1 leading-relaxed">
-                {nextClass.description}
-              </p>
-            </div>
-
-            {/* Lecture Material Bar */}
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-violet-100 text-violet-700 flex items-center justify-center shrink-0">
-                  <FileText className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-ink">Course Reference Deck</p>
-                  <div className="flex items-center gap-2 text-[10px] text-ink-muted mt-0.5">
-                    <span className="text-emerald-600 font-semibold">Available for study</span>
-                    <span>•</span>
-                    <span>PDF Document</span>
-                  </div>
-                </div>
+            {loading ? (
+              <div className="p-6 text-center text-xs text-ink-muted">Loading course materials...</div>
+            ) : resources.length === 0 ? (
+              <div className="p-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                <FileText className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                <p className="text-sm font-semibold text-ink">No course materials uploaded yet</p>
+                <p className="text-xs text-ink-muted mt-1 max-w-sm mx-auto">
+                  Your instructor has not uploaded lecture notes, syllabi, or reference documents for this course yet.
+                </p>
               </div>
-
-              <Button
-                variant="outline"
-                size="xs"
-                onClick={() => setActiveTab('Resources')}
-                icon={Download}
-                className="font-medium text-xs bg-white"
-              >
-                Browse Resources
-              </Button>
-            </div>
-
-            {/* Prepare Note */}
-            <div className="text-xs text-ink-muted bg-amber-50/70 p-3 rounded-xl border border-amber-200/80">
-              <strong className="text-amber-900 font-semibold">Prepare:</strong>{' '}
-              <span className="text-amber-800">{nextClass.prepare}</span>
-            </div>
+            ) : (
+              <div className="space-y-3">
+                {resources.slice(0, 3).map((r) => (
+                  <div
+                    key={r.resourceId || r.id}
+                    className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 hover:border-slate-300 flex items-center justify-between gap-3 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-violet-100 text-violet-700 flex items-center justify-center shrink-0">
+                        <FileText className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-ink">{r.title}</h4>
+                        <p className="text-[10px] text-ink-muted mt-0.5">
+                          {r.description || 'Uploaded course document'} ·{' '}
+                          {r.uploadedAt ? new Date(r.uploadedAt).toLocaleDateString() : 'Recent'}
+                        </p>
+                      </div>
+                    </div>
+                    {r.fileUrl ? (
+                      <a
+                        href={r.fileUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-white text-xs font-semibold text-ink flex items-center gap-1.5 transition-colors shadow-2xs"
+                      >
+                        <Download className="w-3.5 h-3.5 text-slate-500" />
+                        Download
+                      </a>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab('Resources')}
+                        className="px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-white text-xs font-semibold text-ink transition-colors shadow-2xs"
+                      >
+                        View
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Course Modules */}
+          {/* Active Coursework & Assignments Section */}
+          <div className="bg-white rounded-2xl border border-ink-border p-6 shadow-soft space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-bold text-ink">Active coursework & assignments</h3>
+                <p className="text-xs text-ink-muted mt-0.5">
+                  Deadlines, homework problem sets, and lab submissions.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveTab('Assignments')}
+                className="text-xs font-semibold text-brand-600 hover:text-brand-700 flex items-center gap-1 shrink-0"
+              >
+                View All ({assignments.length})
+                <ExternalLink className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            {loading ? (
+              <div className="p-6 text-center text-xs text-ink-muted">Loading assignments...</div>
+            ) : assignments.length === 0 ? (
+              <div className="p-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                <BookOpen className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                <p className="text-sm font-semibold text-ink">No assignments published yet</p>
+                <p className="text-xs text-ink-muted mt-1 max-w-sm mx-auto">
+                  There are currently no homework tasks, lab exercises, or project prompts assigned for this course.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {assignments.slice(0, 3).map((a) => {
+                  const status = (a.studentStatus || a.myStatus || 'PENDING').toUpperCase();
+                  const dueDate = a.dueDate ? new Date(a.dueDate) : null;
+                  const dueLabel = dueDate
+                    ? dueDate.toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+                    : 'No due date';
+
+                  return (
+                    <div
+                      key={a.assignmentId}
+                      className="p-3.5 rounded-xl border border-slate-200/80 bg-slate-50 hover:bg-white flex items-center justify-between gap-3 transition-colors"
+                    >
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-xs font-bold text-ink">{a.title}</h4>
+                          <Badge
+                            variant={
+                              status === 'APPROVED' || status === 'GRADED'
+                                ? 'success'
+                                : status === 'SUBMITTED'
+                                ? 'purple'
+                                : 'neutral'
+                            }
+                            size="sm"
+                          >
+                            {status === 'SUBMITTED' ? 'Submitted' : status === 'APPROVED' || status === 'GRADED' ? 'Graded' : 'Pending'}
+                          </Badge>
+                        </div>
+                        <p className="text-[11px] text-ink-muted flex items-center gap-1">
+                          <Calendar className="w-3 h-3 text-slate-400" />
+                          Due: {dueLabel} · Max Marks: {a.maxMarks || 100}
+                        </p>
+                      </div>
+
+                      <Button
+                        variant="outline"
+                        size="xs"
+                        onClick={() => setActiveTab('Assignments')}
+                        className="font-semibold text-xs bg-white"
+                      >
+                        {status === 'SUBMITTED' ? 'Review' : 'Open'}
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Course Modules Section */}
           <div className="bg-white rounded-2xl border border-ink-border p-6 shadow-soft space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-bold text-ink">Course modules</h3>
-              <span className="text-[11px] font-semibold text-ink-muted">
-                Curriculum Structure
-              </span>
+              <span className="text-[11px] font-semibold text-ink-muted">Curriculum Structure</span>
             </div>
 
-            <div className="space-y-3">
-              {defaultModules.map((mod) => (
-                <div
-                  key={mod.id}
-                  className="p-4 rounded-xl border border-slate-100 bg-slate-50/60 hover:bg-slate-50 flex items-center justify-between transition-colors"
-                >
-                  <div className="flex items-center gap-3.5">
-                    <div className="text-sm font-bold text-ink-muted w-6">
-                      {mod.number}
+            {realModules.length === 0 ? (
+              <div className="p-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                <Layers className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                <p className="text-sm font-semibold text-ink">No curriculum modules structured yet</p>
+                <p className="text-xs text-ink-muted mt-1 max-w-sm mx-auto">
+                  Syllabus units and curriculum chapters will appear here once published by your professor.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {realModules.map((mod, idx) => (
+                  <div
+                    key={mod.id || idx}
+                    className="p-4 rounded-xl border border-slate-100 bg-slate-50/60 hover:bg-slate-50 flex items-center justify-between transition-colors"
+                  >
+                    <div className="flex items-center gap-3.5">
+                      <div className="text-sm font-bold text-ink-muted w-6">
+                        {String(idx + 1).padStart(2, '0')}
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-ink">{mod.title}</h4>
+                        <p className="text-[11px] text-ink-muted mt-0.5">{mod.summary || mod.description}</p>
+                      </div>
                     </div>
+
                     <div>
-                      <h4 className="text-xs font-bold text-ink">{mod.title}</h4>
-                      <p className="text-[11px] text-ink-muted mt-0.5">
-                        {mod.summary}
-                      </p>
+                      {mod.status === 'complete' && (
+                        <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                          <CheckCircle2 className="w-4 h-4" />
+                        </div>
+                      )}
+                      {mod.status === 'in_progress' && (
+                        <span className="text-xs font-bold text-brand-600 bg-brand-50 px-2 py-0.5 rounded-full">
+                          In progress
+                        </span>
+                      )}
+                      {mod.status === 'locked' && (
+                        <div className="w-6 h-6 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center">
+                          <Lock className="w-3.5 h-3.5" />
+                        </div>
+                      )}
                     </div>
                   </div>
-
-                  <div>
-                    {mod.status === 'complete' && (
-                      <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
-                        <CheckCircle2 className="w-4 h-4" />
-                      </div>
-                    )}
-                    {mod.status === 'in_progress' && (
-                      <span className="text-xs font-bold text-brand-600 bg-brand-50 px-2 py-0.5 rounded-full">
-                        In progress
-                      </span>
-                    )}
-                    {mod.status === 'locked' && (
-                      <div className="w-6 h-6 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center">
-                        <Lock className="w-3.5 h-3.5" />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Right Column (4 cols): Course Actions & Instructor */}
+        {/* Right Column (4 cols): Quick Tabs, Stats & Instructor */}
         <div className="lg:col-span-4 space-y-6">
-          {/* Quick Actions */}
+          {/* Quick Actions Navigation */}
           <div className="bg-white rounded-2xl border border-ink-border p-5 shadow-soft space-y-3">
             <h3 className="text-sm font-bold text-ink mb-1">Quick actions</h3>
             <div className="space-y-2.5">
-              {thisWeekItems.map((item) => (
-                <div
-                  key={item.id}
-                  onClick={() => {
-                    if (item.tab) setActiveTab(item.tab);
-                    else if (item.link) navigate(item.link);
-                  }}
-                  className="p-3 rounded-xl border-l-4 border-l-brand-500 bg-slate-50 hover:bg-brand-50/60 transition-colors cursor-pointer group flex items-center justify-between"
-                >
-                  <div>
-                    <h5 className="text-xs font-bold text-ink group-hover:text-brand-600 transition-colors">
-                      {item.title}
-                    </h5>
-                    <p className="text-[11px] text-ink-muted mt-0.5">
-                      {item.time}
-                    </p>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-ink-muted group-hover:text-brand-600 group-hover:translate-x-0.5 transition-transform" />
+              <div
+                onClick={() => setActiveTab('Assignments')}
+                className="p-3 rounded-xl border-l-4 border-l-brand-500 bg-slate-50 hover:bg-brand-50/60 transition-colors cursor-pointer group flex items-center justify-between"
+              >
+                <div>
+                  <h5 className="text-xs font-bold text-ink group-hover:text-brand-600 transition-colors">
+                    View Course Assignments
+                  </h5>
+                  <p className="text-[11px] text-ink-muted mt-0.5">
+                    {assignments.length > 0 ? `${assignments.length} published assignment(s)` : 'Check Deadlines & Rubrics'}
+                  </p>
                 </div>
-              ))}
+                <ChevronRight className="w-4 h-4 text-ink-muted group-hover:text-brand-600 group-hover:translate-x-0.5 transition-transform" />
+              </div>
+
+              <div
+                onClick={() => setActiveTab('Resources')}
+                className="p-3 rounded-xl border-l-4 border-l-violet-500 bg-slate-50 hover:bg-violet-50/60 transition-colors cursor-pointer group flex items-center justify-between"
+              >
+                <div>
+                  <h5 className="text-xs font-bold text-ink group-hover:text-violet-600 transition-colors">
+                    Browse Syllabus & Resources
+                  </h5>
+                  <p className="text-[11px] text-ink-muted mt-0.5">
+                    {resources.length > 0 ? `${resources.length} resource file(s)` : 'Lecture Slides & Files'}
+                  </p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-ink-muted group-hover:text-violet-600 group-hover:translate-x-0.5 transition-transform" />
+              </div>
+
+              <div
+                onClick={() => setActiveTab('Quizzes')}
+                className="p-3 rounded-xl border-l-4 border-l-emerald-500 bg-slate-50 hover:bg-emerald-50/60 transition-colors cursor-pointer group flex items-center justify-between"
+              >
+                <div>
+                  <h5 className="text-xs font-bold text-ink group-hover:text-emerald-600 transition-colors">
+                    Take Course Quizzes
+                  </h5>
+                  <p className="text-[11px] text-ink-muted mt-0.5">
+                    {quizzes.length > 0 ? `${quizzes.length} available quiz(zes)` : 'Knowledge Checks & Practice'}
+                  </p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-ink-muted group-hover:text-emerald-600 group-hover:translate-x-0.5 transition-transform" />
+              </div>
+
+              <div
+                onClick={() => setActiveTab('Grades')}
+                className="p-3 rounded-xl border-l-4 border-l-amber-500 bg-slate-50 hover:bg-amber-50/60 transition-colors cursor-pointer group flex items-center justify-between"
+              >
+                <div>
+                  <h5 className="text-xs font-bold text-ink group-hover:text-amber-600 transition-colors">
+                    Check Gradebook
+                  </h5>
+                  <p className="text-[11px] text-ink-muted mt-0.5">
+                    Scores, feedback & completion
+                  </p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-ink-muted group-hover:text-amber-600 group-hover:translate-x-0.5 transition-transform" />
+              </div>
             </div>
           </div>
 
@@ -284,7 +394,7 @@ export function OverviewTab({ course, setActiveTab }) {
                 <div>
                   <h4 className="text-xs font-bold text-ink">{instructorName}</h4>
                   <p className="text-[11px] text-ink-muted mt-0.5">
-                    Faculty Department Office Hours
+                    Course Instructor
                   </p>
                 </div>
               </div>
