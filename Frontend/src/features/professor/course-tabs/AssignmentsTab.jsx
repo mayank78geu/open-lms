@@ -121,7 +121,7 @@ export function AssignmentsTab({ courseId, course }) {
       const payload = {
         title: title.trim(),
         description: description.trim() || null,
-        dueDate: new Date(dueDate).toISOString(),
+        dueDate: new Date(dueDate).toISOString().slice(0, 19),
         maxMarks: marksNum,
         attachmentUrl: attachmentUrl.trim() || null,
       };

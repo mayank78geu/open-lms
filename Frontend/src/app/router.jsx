@@ -19,6 +19,7 @@ import { SubmissionsGradingPage } from '../features/professor/SubmissionsGrading
 import { ProfessorGradebookPage } from '../features/professor/ProfessorGradebookPage';
 import { MessagesPage } from '../features/messages/MessagesPage';
 import { NotFoundPage } from '../features/common/NotFoundPage';
+import { ApiHealthPage } from '../features/common/ApiHealthPage';
 import { useAuthStore } from '../store/authStore';
 
 // Dynamic role wrapper for shared routes like /messages
@@ -51,6 +52,14 @@ export const router = createBrowserRouter([
   {
     path: '/signup/professor',
     element: <StudentSignupPage />,
+  },
+  {
+    path: '/health',
+    element: <ApiHealthPage />,
+  },
+  {
+    path: '/api-status',
+    element: <ApiHealthPage />,
   },
 
   // Focus Mode Quiz (no sidebar)

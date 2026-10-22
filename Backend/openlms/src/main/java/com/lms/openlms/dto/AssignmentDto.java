@@ -2,6 +2,7 @@ package com.lms.openlms.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.validation.constraints.*;
 
 import java.time.LocalDateTime;
@@ -18,6 +19,7 @@ public class AssignmentDto {
 
         @NotNull(message = "Due date is required")
         @Future(message = "Due date must be in the future")
+        @JsonDeserialize(using = com.lms.openlms.config.FlexibleDateTimeDeserializer.class)
         @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
         private LocalDateTime dueDate;
 
@@ -90,6 +92,7 @@ public class AssignmentDto {
         private String description;
 
         @NotNull(message = "Due date is required")
+        @JsonDeserialize(using = com.lms.openlms.config.FlexibleDateTimeDeserializer.class)
         @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
         private LocalDateTime dueDate;
 
