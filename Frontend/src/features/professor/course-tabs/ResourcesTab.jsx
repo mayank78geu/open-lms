@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '../../../components/ui/Button';
 import { Modal } from '../../../components/ui/Modal';
 import { Input } from '../../../components/ui/Input';
+import { FileUploader } from '../../../components/ui/FileUploader';
 import { FileText, Plus, Trash2, ExternalLink } from 'lucide-react';
 import { listResources, createResource, deleteResource } from '../../../lib/api/resourcesApi';
 
@@ -169,6 +170,23 @@ export function ResourcesTab({ courseId, course }) {
             value={newResource.title}
             onChange={(e) => setNewResource({ ...newResource, title: e.target.value })}
           />
+
+          <div className="space-y-1">
+            <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
+              Upload Document (Cloudinary)
+            </label>
+            <FileUploader
+              folder="resources"
+              label="Upload syllabus, slides, or reading material (up to 10MB)"
+              onUploadSuccess={(res) => {
+                setNewResource((prev) => ({
+                  ...prev,
+                  fileUrl: res.fileUrl || res.url,
+                  title: prev.title || res.originalName || '',
+                }));
+              }}
+            />
+          </div>
 
           <Input
             label="File / Material URL"

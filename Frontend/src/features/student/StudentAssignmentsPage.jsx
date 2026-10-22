@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
+import { FileUploader } from '../../components/ui/FileUploader';
 import { listMyAssignments } from '../../lib/api/assignmentsApi';
 import { submitAssignment } from '../../lib/api/submissionsApi';
-import { CheckCircle2, Clock, FileText, Upload, AlertCircle, ExternalLink } from 'lucide-react';
+import { CheckCircle2, Clock, FileText, Upload, AlertCircle, ExternalLink, Paperclip } from 'lucide-react';
 
 export function StudentAssignmentsPage() {
   const [assignments, setAssignments] = useState([]);
@@ -194,6 +195,34 @@ export function StudentAssignmentsPage() {
                     <span className="font-semibold">{a.maxMarks || a.maxPoints || 100} points max</span>
                   </div>
 
+                  {a.attachmentUrl && (
+                    <div className="pt-1">
+                      <a
+                        href={a.attachmentUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-xs text-brand-600 hover:text-brand-700 hover:underline font-medium"
+                      >
+                        <Paperclip className="w-3.5 h-3.5" />
+                        <span>Assignment Handout</span>
+                      </a>
+                    </div>
+                  )}
+
+                  {sub?.fileUrl && (
+                    <div className="pt-0.5">
+                      <a
+                        href={sub.fileUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-xs text-violet-600 hover:text-violet-700 hover:underline"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        <span>Submitted File</span>
+                      </a>
+                    </div>
+                  )}
+
                   {/* Feedback display if graded */}
                   {sub && (status === 'APPROVED' || status === 'REJECTED') && (
                     <div className="mt-3 p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1">
@@ -282,6 +311,15 @@ export function StudentAssignmentsPage() {
               onChange={(e) => setSubmissionText(e.target.value)}
               placeholder="Type your notes, solution, or reflection here..."
               className="w-full px-3 py-2 text-xs rounded-xl border border-ink-border focus:outline-none focus:ring-2 focus:ring-brand-500"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs font-semibold text-ink">Upload Solution File (Cloudinary)</label>
+            <FileUploader
+              folder="submissions"
+              label="Upload your report, code zip, or presentation (up to 10MB)"
+              onUploadSuccess={(res) => setFileUrl(res.fileUrl || res.url)}
             />
           </div>
 

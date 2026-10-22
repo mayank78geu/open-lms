@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../../../components/ui/Button';
 import { Modal } from '../../../components/ui/Modal';
 import { Badge } from '../../../components/ui/Badge';
+import { FileUploader } from '../../../components/ui/FileUploader';
 import {
   listCourseAssignments,
   createAssignment,
@@ -310,6 +311,15 @@ export function AssignmentsTab({ courseId, course }) {
                 className="w-full px-3 py-2 text-xs rounded-xl border border-ink-border focus:outline-none focus:ring-2 focus:ring-brand-500"
               />
             </div>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs font-semibold text-ink">Assignment Handout / Document (Cloudinary)</label>
+            <FileUploader
+              folder="assignments"
+              label="Upload assignment instructions, rubric, or starter files (up to 10MB)"
+              onUploadSuccess={(res) => setAttachmentUrl(res.fileUrl || res.url)}
+            />
           </div>
 
           <div className="space-y-1">

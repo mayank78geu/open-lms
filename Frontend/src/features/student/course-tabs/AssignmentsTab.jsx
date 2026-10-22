@@ -4,7 +4,8 @@ import { Button } from '../../../components/ui/Button';
 import { Modal } from '../../../components/ui/Modal';
 import { listCourseAssignments } from '../../../lib/api/assignmentsApi';
 import { submitAssignment } from '../../../lib/api/submissionsApi';
-import { Clock, Upload, CheckCircle2, AlertCircle, FileText } from 'lucide-react';
+import { FileUploader } from '../../../components/ui/FileUploader';
+import { Clock, Upload, CheckCircle2, AlertCircle, FileText, Paperclip, ExternalLink } from 'lucide-react';
 
 export function AssignmentsTab({ course }) {
   const courseId = course?.courseId || course?.id;
@@ -131,6 +132,32 @@ export function AssignmentsTab({ course }) {
                     <p className="text-xs text-ink-muted line-clamp-1 max-w-xl">{a.description}</p>
                   )}
 
+                  {a.attachmentUrl && (
+                    <div className="pt-0.5">
+                      <a
+                        href={a.attachmentUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-[11px] font-medium text-brand-600 hover:text-brand-700 hover:underline"
+                      >
+                        <Paperclip className="w-3 h-3" /> Assignment Handout
+                      </a>
+                    </div>
+                  )}
+
+                  {sub?.fileUrl && (
+                    <div className="pt-0.5">
+                      <a
+                        href={sub.fileUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-[11px] text-violet-600 hover:text-violet-700 hover:underline"
+                      >
+                        <ExternalLink className="w-3 h-3" /> Submitted File
+                      </a>
+                    </div>
+                  )}
+
                   {sub && (status === 'APPROVED' || status === 'REJECTED') && (
                     <div className="mt-2 p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-xs space-y-0.5">
                       <p className={`font-semibold ${status === 'APPROVED' ? 'text-emerald-700' : 'text-rose-700'}`}>
@@ -207,6 +234,15 @@ export function AssignmentsTab({ course }) {
               onChange={(e) => setSubmissionText(e.target.value)}
               placeholder="Type your notes, solution, or reflection here..."
               className="w-full px-3 py-2 text-xs rounded-xl border border-ink-border focus:outline-none focus:ring-2 focus:ring-brand-500"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs font-semibold text-ink">Upload Solution File (Cloudinary)</label>
+            <FileUploader
+              folder="submissions"
+              label="Upload report, code archive, or presentation (up to 10MB)"
+              onUploadSuccess={(res) => setFileUrl(res.fileUrl || res.url)}
             />
           </div>
 
