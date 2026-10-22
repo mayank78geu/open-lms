@@ -100,7 +100,7 @@ export function ProfessorCoursesPage() {
           return (
             <div
               key={course.id}
-              onClick={() => navigate('/professor/submissions')}
+              onClick={() => navigate(`/professor/courses/${course.id || course.courseId}`)}
               className="bg-white rounded-2xl border border-ink-border p-6 shadow-soft hover:shadow-card hover:border-slate-300 transition-all cursor-pointer flex flex-col justify-between group"
             >
               <div>

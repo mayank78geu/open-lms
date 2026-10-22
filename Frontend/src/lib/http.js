@@ -1,16 +1,15 @@
 import { authStorage } from './auth';
+import { useAuthStore } from '../store/authStore';
 
 // Standard normalized API response helper
 export async function apiRequest(endpoint, options = {}) {
   const token = authStorage.getToken();
   const headers = {
-    'Content-Type': 'application/json',
+    ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...options.headers,
   };
 
-  // In mock mode, this resolves mock responses directly
-  // When VITE_USE_MOCKS is false, it uses fetch against VITE_API_BASE_URL
   const useMocks = import.meta.env.VITE_USE_MOCKS === 'true';
   const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081/api/v1';
 
@@ -22,12 +21,24 @@ export async function apiRequest(endpoint, options = {}) {
       });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          useAuthStore.getState().logout();
+          if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+            window.location.href = '/login';
+          }
+        }
+
         const errorData = await response.json().catch(() => ({}));
         throw {
           status: response.status,
+          error: errorData.error || 'ERROR',
           message: errorData.message || 'API request failed',
-          fieldErrors: errorData.errors || [],
+          fieldErrors: errorData.fieldErrors || errorData.errors || [],
         };
+      }
+
+      if (response.status === 204) {
+        return null;
       }
 
       return await response.json();
@@ -37,6 +48,7 @@ export async function apiRequest(endpoint, options = {}) {
       }
       throw {
         status: 0,
+        error: 'NETWORK_ERROR',
         message: 'Unable to connect to the backend. Make sure the Spring Boot server is running.',
         fieldErrors: [],
       };

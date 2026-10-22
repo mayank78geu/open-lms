@@ -1,0 +1,17 @@
+import React from 'react';
+
+export function QuizzesTab({ courseId, course }) {
+  return (
+    <div className="bg-white rounded-2xl border border-ink-border p-6 shadow-soft space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-base font-bold text-ink">Quizzes & Assessments</h3>
+          <p className="text-xs text-ink-muted">Build interactive multiple choice assessments.</p>
+        </div>
+      </div>
+      <div className="p-4 rounded-xl border border-slate-100 bg-slate-50 text-xs text-ink-muted">
+        No quizzes configured yet.
+      </div>
+    </div>
+  );
+}

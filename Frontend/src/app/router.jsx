@@ -5,6 +5,7 @@ import { ChooseRolePage } from '../features/landing/ChooseRolePage';
 import { LoginPage } from '../features/auth/LoginPage';
 import { StudentSignupPage } from '../features/auth/StudentSignupPage';
 import { StudentLayout, ProfessorLayout } from '../components/layout/DashboardLayouts';
+import { RequireAuth, RequireRole } from '../components/layout/RouteGuards';
 import { StudentDashboardPage } from '../features/student/StudentDashboardPage';
 import { StudentClassesPage } from '../features/student/StudentClassesPage';
 import { CourseDetailPage } from '../features/student/CourseDetailPage';
@@ -13,6 +14,7 @@ import { StudentAssignmentsPage } from '../features/student/StudentAssignmentsPa
 import { QuizTakingPage } from '../features/student/QuizTakingPage';
 import { ProfessorDashboardPage } from '../features/professor/ProfessorDashboardPage';
 import { ProfessorCoursesPage } from '../features/professor/ProfessorCoursesPage';
+import { ProfessorCourseDetailPage } from '../features/professor/ProfessorCourseDetailPage';
 import { SubmissionsGradingPage } from '../features/professor/SubmissionsGradingPage';
 import { ProfessorGradebookPage } from '../features/professor/ProfessorGradebookPage';
 import { MessagesPage } from '../features/messages/MessagesPage';
@@ -22,7 +24,7 @@ import { useAuthStore } from '../store/authStore';
 // Dynamic role wrapper for shared routes like /messages
 function DynamicRoleLayout() {
   const role = useAuthStore((s) => s.role);
-  if (role === 'PROFESSOR') {
+  if (role === 'PROFESSOR' || role === 'FACULTY') {
     return <ProfessorLayout />;
   }
   return <StudentLayout />;
@@ -54,13 +56,25 @@ export const router = createBrowserRouter([
   // Focus Mode Quiz (no sidebar)
   {
     path: '/student/classes/:courseId/quizzes/:quizId',
-    element: <QuizTakingPage />,
+    element: (
+      <RequireAuth>
+        <RequireRole allowedRole="STUDENT">
+          <QuizTakingPage />
+        </RequireRole>
+      </RequireAuth>
+    ),
   },
 
   // Student Workspace
   {
     path: '/student',
-    element: <StudentLayout />,
+    element: (
+      <RequireAuth>
+        <RequireRole allowedRole="STUDENT">
+          <StudentLayout />
+        </RequireRole>
+      </RequireAuth>
+    ),
     children: [
       {
         index: true,
@@ -92,7 +106,13 @@ export const router = createBrowserRouter([
   // Professor Workspace
   {
     path: '/professor',
-    element: <ProfessorLayout />,
+    element: (
+      <RequireAuth>
+        <RequireRole allowedRole="FACULTY">
+          <ProfessorLayout />
+        </RequireRole>
+      </RequireAuth>
+    ),
     children: [
       {
         index: true,
@@ -105,6 +125,10 @@ export const router = createBrowserRouter([
       {
         path: 'courses',
         element: <ProfessorCoursesPage />,
+      },
+      {
+        path: 'courses/:courseId',
+        element: <ProfessorCourseDetailPage />,
       },
       {
         path: 'submissions',
@@ -124,7 +148,11 @@ export const router = createBrowserRouter([
   // Shared Routes
   {
     path: '/messages',
-    element: <DynamicRoleLayout />,
+    element: (
+      <RequireAuth>
+        <DynamicRoleLayout />
+      </RequireAuth>
+    ),
     children: [
       {
         index: true,
