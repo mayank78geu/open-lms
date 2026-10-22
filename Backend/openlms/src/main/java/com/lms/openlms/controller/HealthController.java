@@ -2,7 +2,7 @@ package com.lms.openlms.controller;
 
 import com.cloudinary.Cloudinary;
 import com.lms.openlms.repository.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -36,7 +36,7 @@ public class HealthController {
                             AssignmentRepository assignmentRepository,
                             QuizRepository quizRepository,
                             SubmissionRepository submissionRepository,
-                            Cloudinary cloudinary) {
+                            ObjectProvider<Cloudinary> cloudinaryProvider) {
         this.jdbcTemplate = jdbcTemplate;
         this.userRepository = userRepository;
         this.courseRepository = courseRepository;
