@@ -19,6 +19,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 
 import java.util.Locale;
 import java.util.Map;
@@ -141,7 +142,10 @@ public class AuthService {
         String name = null;
 
         try {
-            RestTemplate restTemplate = new RestTemplate();
+            SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+            requestFactory.setConnectTimeout(8000);
+            requestFactory.setReadTimeout(8000);
+            RestTemplate restTemplate = new RestTemplate(requestFactory);
             if (request.getCredential() != null && !request.getCredential().trim().isEmpty()) {
                 String url = "https://oauth2.googleapis.com/tokeninfo?id_token=" + request.getCredential().trim();
                 Map<?, ?> response = restTemplate.getForObject(url, Map.class);
