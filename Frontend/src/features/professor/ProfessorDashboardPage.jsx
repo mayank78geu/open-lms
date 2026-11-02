@@ -102,7 +102,7 @@ export function ProfessorDashboardPage() {
                 <div className="flex items-center gap-2 mb-1">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                   <span className="text-[10px] font-bold uppercase tracking-wider text-violet-200">
-                    QUICK ACCESS
+                    QUICK ACTIONS
                   </span>
                 </div>
                 <h4 className="text-sm font-bold text-white">
