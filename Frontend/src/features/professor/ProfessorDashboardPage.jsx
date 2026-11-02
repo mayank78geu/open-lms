@@ -106,7 +106,7 @@ export function ProfessorDashboardPage() {
                   </span>
                 </div>
                 <h4 className="text-sm font-bold text-white">
-                  Manage Courses & Syllabi
+                  Manage Courses & Syllabus
                 </h4>
                 <p className="text-xs text-violet-200 mt-0.5">
                   {courses.length} active class{courses.length === 1 ? '' : 'es'}

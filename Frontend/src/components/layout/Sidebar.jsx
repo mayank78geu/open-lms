@@ -52,7 +52,7 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="fixed bottom-0 left-0 right-0 w-full h-16 md:static md:w-56 md:h-screen shrink-0 bg-navy-900 text-white flex flex-col justify-between border-t md:border-t-0 md:border-r border-navy-800 z-30 select-none">
+    <aside className="fixed bottom-0 left-0 right-0 w-full h-16 md:sticky md:top-0 md:self-start md:w-56 md:h-screen md:min-h-screen shrink-0 bg-navy-900 text-white flex flex-col justify-between border-t md:border-t-0 md:border-r border-navy-800 z-30 select-none md:overflow-y-auto">
       {/* Brand & Top Navigation */}
       <div className="flex flex-col">
         {/* Brand Header */}
