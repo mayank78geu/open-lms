@@ -457,3 +457,16 @@ export async function deleteMessage(groupId, messageId) {
     method: 'DELETE',
   });
 }
+
+export async function deleteMessageForEveryone(groupId, messageId) {
+  if (useMocks) {
+    const msgs = mockMessages[groupId];
+    if (msgs) {
+      mockMessages[groupId] = msgs.filter((m) => m.messageId !== Number(messageId));
+    }
+    return null;
+  }
+  return apiRequest(`/chat/groups/${groupId}/messages/${messageId}`, {
+    method: 'DELETE',
+  });
+}
